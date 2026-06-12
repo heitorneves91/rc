@@ -1,0 +1,70 @@
+# Gradle
+.gradle/
+build/
+*/build/
+
+# Local configuration
+local.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Generated files
+captures/
+.externalNativeBuild/
+.cxx/
+
+# APKs / AABs
+*.apk
+*.aab
+
+# Logs
+*.log
+
+# Keystores (don't commit signing keys)
+*.jks
+*.keystore
+
+# Kotlin
+.kotlin/
+
+# Navigation editor temp files
+.navigation/
+
+# Android Studio captures
+captures/
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Linux
+.directory
+
+# NDK
+obj/
+
+# Firebase
+google-services.json
+
+# Secrets / environment files
+.env
+.env.*
+
+# Crashlytics
+com_crashlytics_export_strings.xml
+crashlytics.properties
+
+# Generated signing configs
+signing.properties
+
+# Temporary files
+*.swp
+*.swo
+*~
+
+# Profiling
+*.hprof
