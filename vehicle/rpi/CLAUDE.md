@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+> **Superseded.** The Raspberry Pi hardware failed; the vehicle now runs the
+> ESP32-S3 firmware in `../esp32s3/rc/`, which is a direct port of this code.
+> This directory is kept as reference only. See `../CLAUDE.md`.
+
 Guidance for working in this repository.
 
 ## What this is
