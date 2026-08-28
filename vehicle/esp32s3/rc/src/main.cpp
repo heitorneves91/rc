@@ -3,9 +3,16 @@
 #include "esp_camera.h"
 #include "esp_http_server.h"
 
-// --- WI-FI CREDENTIALS ---
-const char* ssid = "mari8s_2";
-const char* password = "h3nr!qu3!!";
+// --- ACCESS POINT CREDENTIALS (the phone joins this network) ---
+const char* ap_ssid     = "rc-car";
+const char* ap_password = "rccar1234";   // must be >= 8 chars, or use "" for an open AP
+const int   ap_channel  = 1;
+const int   ap_max_conn = 2;
+
+// Fixed AP addressing, so the stream URL never changes
+IPAddress ap_ip(192, 168, 4, 1);
+IPAddress ap_gateway(192, 168, 4, 1);
+IPAddress ap_subnet(255, 255, 255, 0);
 
 // --- PIN CONFIGURATION FOR SEEED XIAO ESP32-S3 SENSE ---
 #define PWDN_GPIO_NUM     -1
@@ -74,9 +81,29 @@ static esp_err_t stream_handler(httpd_req_t *req) {
     return res;
 }
 
+// Minimal page so the phone can just open http://192.168.4.1/
+static const char* _INDEX_HTML =
+    "<!DOCTYPE html><html><head>"
+    "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+    "<title>RC Camera</title>"
+    "<style>body{margin:0;background:#111}img{width:100%;height:auto;display:block}</style>"
+    "</head><body><img src='/stream'></body></html>";
+
+static esp_err_t index_handler(httpd_req_t *req) {
+    httpd_resp_set_type(req, "text/html");
+    return httpd_resp_send(req, _INDEX_HTML, HTTPD_RESP_USE_STRLEN);
+}
+
 void startCameraServer() {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.server_port = 80;
+
+    httpd_uri_t index_uri = {
+        .uri       = "/",
+        .method    = HTTP_GET,
+        .handler   = index_handler,
+        .user_ctx  = NULL
+    };
 
     httpd_uri_t stream_uri = {
         .uri       = "/stream",
@@ -84,8 +111,9 @@ void startCameraServer() {
         .handler   = stream_handler,
         .user_ctx  = NULL
     };
-    
+
     if (httpd_start(&stream_httpd, &config) == ESP_OK) {
+        httpd_register_uri_handler(stream_httpd, &index_uri);
         httpd_register_uri_handler(stream_httpd, &stream_uri);
         Serial.println("HTTP Server started successfully.");
     }
@@ -130,19 +158,21 @@ void setup() {
         return;
     }
 
-    // Connect to Wi-Fi
-    WiFi.begin(ssid, password);
-    Serial.print("Connecting to Wi-Fi");
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
+    // Start the ESP as its own access point; the phone connects directly to it
+    WiFi.mode(WIFI_AP);
+    if (!WiFi.softAPConfig(ap_ip, ap_gateway, ap_subnet)) {
+        Serial.println("softAPConfig failed");
     }
-    Serial.println("\nWi-Fi Connected!");
-    
-    // Print the local IP Address assigned to your XIAO
-    Serial.print("Camera Stream link: http://");
-    Serial.print(WiFi.localIP());
-    Serial.println("/stream");
+    if (!WiFi.softAP(ap_ssid, ap_password, ap_channel, /*hidden=*/0, ap_max_conn)) {
+        Serial.println("Failed to start access point");
+        return;
+    }
+    WiFi.setSleep(false);   // keeps the stream smooth
+
+    Serial.printf("\nAccess Point up.\n  SSID: %s\n  Password: %s\n", ap_ssid, ap_password);
+    Serial.print("Join that network, then open: http://");
+    Serial.print(WiFi.softAPIP());
+    Serial.println("/");
 
     startCameraServer();
 }
