@@ -34,9 +34,11 @@ struct CameraConfig {
     int width = 640;
     int height = 480;
     int framerate = 25;
-    // TCP port the MJPEG stream is served on (the ground station pulls the
-    // stream instead of the vehicle pushing it - see camera_service.h).
-    int stream_port = 80;
+    // UDP port on the *ground station* that MJPEG frames are pushed to. Same
+    // port the Raspberry Pi build pushed H.264 to, so the ground station keeps
+    // listening where it always did - only the payload changed. See
+    // camera_service.h for the chunk format.
+    int video_port = 9999;
     // 10-63; lower is better quality and a bigger frame.
     int jpeg_quality = 12;
 };

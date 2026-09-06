@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class VehicleService {
 
-    private val DEFAULT_HOST = "192.168.0.123"
+    private val DEFAULT_HOST = "192.168.4.1"
     private val DEFAULT_PORT = 8888
 
     var address = InetAddress.getByName(DEFAULT_HOST)

@@ -2,10 +2,13 @@
 
 #include <Preferences.h>
 
+#include "logs.h"
+
 namespace {
 
 // NVS namespace and keys. NVS keys are limited to 15 characters, hence the
 // abbreviated names; they are an implementation detail of this file.
+constexpr const char* kTag = "configuration";
 constexpr const char* kNamespace = "rc";
 
 Preferences prefs;
@@ -15,8 +18,13 @@ Preferences prefs;
 Configuration config;
 
 void Configuration::load() {
-    if (!prefs.begin(kNamespace, /*readOnly=*/true)) {
-        // Nothing stored yet - defaults stand.
+    // Read-write on purpose, even though load() only reads: nvs_open() creates
+    // the namespace only in read-write mode, so a read-only open on a device
+    // that has never called save() fails with NOT_FOUND and logs an NVS error
+    // on every boot. Opening it this way creates an empty namespace instead,
+    // and every getter below still falls back to the compiled-in default.
+    if (!prefs.begin(kNamespace, /*readOnly=*/false)) {
+        LOG_WARN(kTag, "NVS unavailable - using compiled-in defaults");
         return;
     }
 
@@ -28,7 +36,7 @@ void Configuration::load() {
     camera.width = prefs.getInt("cam_width", camera.width);
     camera.height = prefs.getInt("cam_height", camera.height);
     camera.framerate = prefs.getInt("cam_fps", camera.framerate);
-    camera.stream_port = prefs.getInt("cam_port", camera.stream_port);
+    camera.video_port = prefs.getInt("cam_port", camera.video_port);
     camera.jpeg_quality = prefs.getInt("cam_quality", camera.jpeg_quality);
 
     ground_station.listen_port = prefs.getInt("gs_port", ground_station.listen_port);
@@ -61,7 +69,7 @@ void Configuration::save() {
     prefs.putInt("cam_width", camera.width);
     prefs.putInt("cam_height", camera.height);
     prefs.putInt("cam_fps", camera.framerate);
-    prefs.putInt("cam_port", camera.stream_port);
+    prefs.putInt("cam_port", camera.video_port);
     prefs.putInt("cam_quality", camera.jpeg_quality);
 
     prefs.putInt("gs_port", ground_station.listen_port);

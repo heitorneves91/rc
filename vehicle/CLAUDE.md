@@ -9,7 +9,7 @@ The vehicle half of a remote-controlled car project.
 - `esp32s3/rc/` — **the vehicle firmware.** PlatformIO/Arduino C++ for a
   **Seeed XIAO ESP32-S3 Sense**. Drives the ESC and steering servo, hosts its
   own WiFi access point, speaks a UDP protocol with the ground station, and
-  serves camera video.
+  pushes camera video to it.
 - `rpi/` — **superseded.** The original Raspberry Pi Python implementation,
   kept as reference; the Pi hardware failed and the firmware above is a direct
   port of it. Do not add features here.
@@ -46,7 +46,7 @@ Every service owns its own FreeRTOS task, so `loop()` does nothing.
 ground_station_service ──commands──▶ movement_service ──LEDC PWM──▶ ESC + servo
    (UDP :8888)   ▲                          │
                  └──── getState() ──────────┘  (telemetry task, 4 Hz)
-   START/STOP_CAMERA ──▶ camera_service ──▶ MJPEG over HTTP (:80/stream)
+   START/STOP_CAMERA ──▶ camera_service ──▶ chunked MJPEG (UDP → ground :9999)
    wifi_service ──▶ soft AP "rc-car" at 192.168.4.1
 ```
 
@@ -64,8 +64,9 @@ persists.
 
 **`movement_service`** — throttle/steering ints map to servo pulse widths
 (`1000 + 10*throttle` µs, `1500 + 5*steering` µs), emitted by LEDC at 50 Hz,
-16-bit, and clamped to 1000–2000 µs. Owns the **failsafe**: a watchdog task
-cuts throttle to 0 if no command arrives within
+14-bit (the S3's maximum duty resolution — 16 makes `ledcSetup` fail), and
+clamped to 1000–2000 µs. Owns the **failsafe**: a watchdog task cuts throttle
+to 0 if no command arrives within
 `config.movement.command_timeout_s`. This deliberately lives here, not in the
 link layer, so *any* caller that stops feeding commands stops the vehicle.
 Note the asymmetry: `setThrottle`/`setSteering` feed the watchdog,
@@ -79,12 +80,18 @@ address sent the last packet. Move commands carry a monotonic `seq`; anything
 resets that counter because the client restarts its own sequence at −1 when it
 reopens its socket.
 
-**`camera_service`** — `esp_camera` + `esp_http_server`. Initialized at
-`FRAMESIZE_UXGA` early in boot (before WiFi, so PSRAM is unfragmented) and
+**`camera_service`** — `esp_camera` plus a send task that pushes JPEG frames
+over UDP (see **Video transport** below for the datagram layout). Initialized
+at `FRAMESIZE_UXGA` early in boot (before WiFi, so PSRAM is unfragmented) and
 scaled down per request; growing the frame size after init would need a buffer
-larger than was reserved. The stream handler polls a `streaming` flag every
-frame so `stop()` can unblock it — `httpd_stop()` waits for handlers to return,
-and the handler otherwise loops forever.
+larger than was reserved. The send loop polls a `streaming` flag every frame so
+`stop()` can end it, and `stop()` waits for the task to actually exit so a
+START arriving straight after a STOP does not find one still winding down. The
+destination is not configured: `START_CAMERA` carries it implicitly, and
+`ground_station_service` passes the address the command arrived from. The
+socket here is a raw lwIP one rather than `WiFiUDP`, whose `write()` copies a
+byte at a time — too slow for the hundreds of datagrams per second this
+path emits.
 
 ### Hardware pin budget
 
@@ -103,18 +110,33 @@ channel 0 belong to the camera's XCLK, so movement uses channels 2 and 3
 | `conf:<seq>,<configuration>,<value>` | ground → vehicle | `GROUND_HELLO`, `START_CAMERA` (optional `width,height,framerate`), `STOP_CAMERA` |
 | `tele:<seq>,<throttle>,<steering>` | vehicle → ground | telemetry |
 
+Video is the one message that is not text — see below.
+
 Commands arrive on `ground_station.listen_port` (8888). The Kotlin client
 interpolates an absent value as the literal string `"null"`; the parser
 normalizes that to empty.
 
-### Video transport — differs from the Pi build
+### Video transport — payload differs from the Pi build
 
-The Pi ran `rpicam-vid` and **pushed H.264 over UDP** to port 9999, which the
-Android app decodes with `MediaCodec`. The ESP32-S3 has no H.264 encoder, so
-the vehicle now **serves MJPEG over HTTP** and the ground station pulls
-`http://192.168.4.1/stream`. The control messages are unchanged.
-`../ground-station-android`'s `CameraService.kt` still expects the old UDP
-H.264 stream and needs updating to match.
+The Pi ran `rpicam-vid` and pushed **H.264** over UDP to the ground station's
+port 9999, where the Android app decoded it with `MediaCodec`. The ESP32-S3 has
+no H.264 encoder, so the payload is now **MJPEG** — one self-contained JPEG per
+frame, no `MediaCodec` in the path at all. The transport is unchanged: the
+vehicle still pushes to `camera.video_port` (9999) at the address `START_CAMERA`
+came from, so the ground station needs no reachable server.
+
+A JPEG exceeds one datagram, so each frame is split into chunks of
+`kVideoChunkPayloadBytes` (1400, to stay inside the WiFi MTU) behind a 16-byte
+big-endian header: magic `JF`, version, flags, frame id, chunk index, chunk
+count, reserved, total JPEG size. Chunk N carries JPEG bytes from
+`N * 1400`, so chunks can be placed in any order. The layout is declared in
+`include/camera_service.h`; the other half is `CameraService.kt`'s
+`FrameAssembler` in `../ground-station-android`, and the two must change
+together.
+
+Loss is not recovered: an incomplete frame is discarded and the next whole
+frame replaces it. That is why MJPEG is a good fit here — with no reference
+frames, a lost frame cannot corrupt the ones after it.
 
 ## Conventions
 

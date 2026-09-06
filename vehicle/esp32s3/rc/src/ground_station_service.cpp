@@ -167,7 +167,9 @@ void GroundStationService::handleConf(const ConfigureMessage& msg, IPAddress add
             last_move_seq_ = -1;
             break;
         case ConfigurationCommand::StartCamera:
-            handleStartCamera(msg);
+            // Video is pushed, so the camera needs somewhere to push it: the
+            // address this command came from, same as telemetry.
+            handleStartCamera(msg, addr);
             break;
         case ConfigurationCommand::StopCamera:
             camera_service::stop();
@@ -178,7 +180,7 @@ void GroundStationService::handleConf(const ConfigureMessage& msg, IPAddress add
     }
 }
 
-void GroundStationService::handleStartCamera(const ConfigureMessage& msg) {
+void GroundStationService::handleStartCamera(const ConfigureMessage& msg, IPAddress addr) {
     // Optional "width,height,framerate". Absent -> defaults. The client sends
     // either all three or none; anything else is rejected and the camera is
     // not started.
@@ -193,7 +195,7 @@ void GroundStationService::handleStartCamera(const ConfigureMessage& msg) {
         }
     }
 
-    camera_service::start(width, height, framerate);
+    camera_service::start(addr, width, height, framerate);
 }
 
 void GroundStationService::startTelemetry() {

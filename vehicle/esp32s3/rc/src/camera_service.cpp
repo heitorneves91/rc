@@ -1,12 +1,13 @@
 #include "camera_service.h"
 
-#include <WiFi.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
+#include <freertos/task.h>
+#include <lwip/sockets.h>
+#include <string.h>
 
 #include "configuration.h"
 #include "esp_camera.h"
-#include "esp_http_server.h"
 #include "logs.h"
 
 namespace camera_service {
@@ -32,22 +33,34 @@ constexpr const char* kTag = "camera_service";
 #define HREF_GPIO_NUM 47
 #define PCLK_GPIO_NUM 13
 
-// HTTP multipart stream separation boundaries.
-#define PART_BOUNDARY "123456789000000000000987654321"
-const char* kStreamContentType = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
-const char* kStreamBoundary = "\r\n--" PART_BOUNDARY "\r\n";
-const char* kStreamPart = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
-
-// Guards `httpd` / `streaming` so START and STOP from the receive loop can't
-// race, mirroring the Pi service's `_lock`.
+// Guards start()/stop() against each other so two commands arriving back to
+// back from the receive loop can't both create a task, mirroring the Pi
+// service's `_lock`. The send loop itself takes no lock - see `dest_ipv4`.
 SemaphoreHandle_t lock = nullptr;
-httpd_handle_t httpd = nullptr;
 bool camera_ready = false;
 
-// Read by the stream handler on every frame so stop() can unblock it: the
-// handler loops forever, and httpd_stop() waits for handlers to return.
+// Read by the send loop on every frame so stop() can unblock it.
 volatile bool streaming = false;
 volatile uint32_t min_frame_interval_ms = 40;
+
+// Destination, as a raw network-order address and port. 32-bit loads are
+// atomic on this core, so the send loop can pick up a new ground-station
+// address mid-stream without a mutex on the hot path.
+volatile uint32_t dest_ipv4 = 0;
+volatile uint16_t dest_port = 0;
+
+// Owned by the send task: set before it starts, cleared as the last thing it
+// does. start()/stop() poll it under `lock` to decide whether a task exists,
+// so it must be volatile - it is written by one task and read by another.
+volatile bool sending = false;
+int video_socket = -1;
+uint16_t frame_id = 0;
+
+// One datagram, reused for every chunk: WiFiUDP would copy the payload a byte
+// at a time (see its write(const uint8_t*, size_t)), which is a poor trade for
+// the ~500 packets/second this path emits, so the video socket is a plain
+// lwIP one and each chunk is assembled here and handed to a single sendto().
+uint8_t packet[kVideoHeaderBytes + kVideoChunkPayloadBytes];
 
 class Lock {
    public:
@@ -59,6 +72,18 @@ void ensureLock() {
     if (lock == nullptr) {
         lock = xSemaphoreCreateMutex();
     }
+}
+
+void writeBE16(uint8_t* out, uint16_t value) {
+    out[0] = static_cast<uint8_t>(value >> 8);
+    out[1] = static_cast<uint8_t>(value);
+}
+
+void writeBE32(uint8_t* out, uint32_t value) {
+    out[0] = static_cast<uint8_t>(value >> 24);
+    out[1] = static_cast<uint8_t>(value >> 16);
+    out[2] = static_cast<uint8_t>(value >> 8);
+    out[3] = static_cast<uint8_t>(value);
 }
 
 // Nearest sensor frame size at or below the requested dimensions. The ground
@@ -85,22 +110,84 @@ framesize_t frameSizeFor(int width, int height) {
     return FRAMESIZE_QVGA;
 }
 
-// Handler for the live MJPEG stream endpoint.
-esp_err_t streamHandler(httpd_req_t* req) {
-    esp_err_t res = httpd_resp_set_type(req, kStreamContentType);
-    if (res != ESP_OK) {
-        return res;
+// Send one chunk, retrying once if lwIP is momentarily out of buffers - a
+// burst of chunks can outrun the WiFi driver's tx queue. Returns false if the
+// chunk was dropped.
+bool sendChunk(size_t length, const sockaddr_in& to) {
+    for (int attempt = 0; attempt < 2; ++attempt) {
+        const int sent = sendto(video_socket, packet, length, 0,
+                                reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+        if (sent == static_cast<int>(length)) {
+            return true;
+        }
+        if (errno != ENOMEM && errno != EAGAIN && errno != EWOULDBLOCK) {
+            return false;
+        }
+        vTaskDelay(pdMS_TO_TICKS(2));
     }
-    httpd_resp_set_hdr(req, "Access-Control-Allow-Origin", "*");
+    return false;
+}
 
-    LOG_INFO(kTag, "stream client connected");
+// Split one JPEG across as many datagrams as it needs. A dropped chunk costs
+// only its own frame: the receiver discards the incomplete frame and picks up
+// the next one, which is why every frame is a self-contained JPEG.
+void sendFrame(const camera_fb_t* fb) {
+    const uint32_t ip = dest_ipv4;
+    const uint16_t port = dest_port;
+    if (ip == 0 || port == 0) {
+        return;
+    }
+
+    sockaddr_in to = {};
+    to.sin_family = AF_INET;
+    to.sin_addr.s_addr = ip;
+    to.sin_port = htons(port);
+
+    const size_t chunk_count =
+        (fb->len + kVideoChunkPayloadBytes - 1) / kVideoChunkPayloadBytes;
+    if (chunk_count == 0 || chunk_count > 0xFFFF) {
+        LOG_WARN(kTag, "frame of %u bytes does not fit the wire format, dropped",
+                 static_cast<unsigned>(fb->len));
+        return;
+    }
+
+    frame_id++;
+
+    for (size_t index = 0; index < chunk_count; ++index) {
+        const size_t offset = index * kVideoChunkPayloadBytes;
+        const size_t payload = min(kVideoChunkPayloadBytes, fb->len - offset);
+
+        packet[0] = 'J';
+        packet[1] = 'F';
+        packet[2] = kVideoProtocolVersion;
+        packet[3] = 0;  // flags
+        writeBE16(&packet[4], frame_id);
+        writeBE16(&packet[6], static_cast<uint16_t>(index));
+        writeBE16(&packet[8], static_cast<uint16_t>(chunk_count));
+        writeBE16(&packet[10], 0);  // reserved
+        writeBE32(&packet[12], static_cast<uint32_t>(fb->len));
+        memcpy(&packet[kVideoHeaderBytes], fb->buf + offset, payload);
+
+        if (!sendChunk(kVideoHeaderBytes + payload, to)) {
+            // The rest of this frame is useless without it; the receiver will
+            // discard the partial frame either way.
+            LOG_DEBUG(kTag, "dropped frame %u at chunk %u/%u (errno %d)", frame_id,
+                      static_cast<unsigned>(index), static_cast<unsigned>(chunk_count), errno);
+            return;
+        }
+        // Hand the WiFi task a chance to drain the queue between chunks.
+        taskYIELD();
+    }
+}
+
+void sendLoop(void* /*arg*/) {
+    LOG_INFO(kTag, "streaming to %s", streamTarget().c_str());
     uint32_t last_frame_ms = 0;
 
     while (streaming) {
         // Pace to the requested framerate instead of streaming flat out; the
         // WiFi link, not the sensor, is the bottleneck.
-        const uint32_t now = millis();
-        const uint32_t since_last = now - last_frame_ms;
+        const uint32_t since_last = millis() - last_frame_ms;
         if (since_last < min_frame_interval_ms) {
             vTaskDelay(pdMS_TO_TICKS(min_frame_interval_ms - since_last));
         }
@@ -109,85 +196,33 @@ esp_err_t streamHandler(httpd_req_t* req) {
         camera_fb_t* fb = esp_camera_fb_get();
         if (!fb) {
             LOG_ERROR(kTag, "camera capture failed");
-            res = ESP_FAIL;
-            break;
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
         }
-
-        char part_buf[64];
-        const size_t hlen =
-            snprintf(part_buf, sizeof(part_buf), kStreamPart, static_cast<unsigned>(fb->len));
-        res = httpd_resp_send_chunk(req, part_buf, hlen);
-        if (res == ESP_OK) {
-            res = httpd_resp_send_chunk(req, reinterpret_cast<const char*>(fb->buf), fb->len);
-        }
-        if (res == ESP_OK) {
-            res = httpd_resp_send_chunk(req, kStreamBoundary, strlen(kStreamBoundary));
-        }
-
+        sendFrame(fb);
         esp_camera_fb_return(fb);
-
-        if (res != ESP_OK) {
-            // Client went away, or the socket died.
-            break;
-        }
     }
 
-    LOG_INFO(kTag, "stream client disconnected");
-    return res;
-}
-
-// Minimal page so a browser can just open http://<vehicle ip>/
-const char* kIndexHtml =
-    "<!DOCTYPE html><html><head>"
-    "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-    "<title>RC Camera</title>"
-    "<style>body{margin:0;background:#111}img{width:100%;height:auto;display:block}</style>"
-    "</head><body><img src='/stream'></body></html>";
-
-esp_err_t indexHandler(httpd_req_t* req) {
-    httpd_resp_set_type(req, "text/html");
-    return httpd_resp_send(req, kIndexHtml, HTTPD_RESP_USE_STRLEN);
+    if (video_socket >= 0) {
+        close(video_socket);
+        video_socket = -1;
+    }
+    LOG_INFO(kTag, "stream stopped");
+    sending = false;
+    vTaskDelete(nullptr);
 }
 
 // Caller must hold `lock`.
-bool startServerLocked() {
-    if (httpd != nullptr) {
+bool openSocketLocked() {
+    if (video_socket >= 0) {
         return true;
     }
-
-    httpd_config_t httpd_config = HTTPD_DEFAULT_CONFIG();
-    httpd_config.server_port = config.camera.stream_port;
-    httpd_config.ctrl_port = config.camera.stream_port + 1000;
-    // One session for the stream, one spare so the index page still loads.
-    httpd_config.max_open_sockets = 3;
-
-    httpd_uri_t index_uri = {
-        .uri = "/", .method = HTTP_GET, .handler = indexHandler, .user_ctx = nullptr};
-    httpd_uri_t stream_uri = {
-        .uri = "/stream", .method = HTTP_GET, .handler = streamHandler, .user_ctx = nullptr};
-
-    if (httpd_start(&httpd, &httpd_config) != ESP_OK) {
-        LOG_ERROR(kTag, "failed to start HTTP server on port %d", config.camera.stream_port);
-        httpd = nullptr;
+    video_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (video_socket < 0) {
+        LOG_ERROR(kTag, "could not create video socket (errno %d)", errno);
         return false;
     }
-    httpd_register_uri_handler(httpd, &index_uri);
-    httpd_register_uri_handler(httpd, &stream_uri);
     return true;
-}
-
-// Caller must hold `lock`.
-void stopServerLocked() {
-    if (httpd == nullptr) {
-        return;
-    }
-    LOG_INFO(kTag, "stopping stream");
-    // Let any in-flight stream handler fall out of its loop before httpd_stop
-    // blocks waiting for it.
-    streaming = false;
-    vTaskDelay(pdMS_TO_TICKS(min_frame_interval_ms + 50));
-    httpd_stop(httpd);
-    httpd = nullptr;
 }
 
 }  // namespace
@@ -242,7 +277,7 @@ bool init() {
     return true;
 }
 
-void start(int width, int height, int framerate) {
+void start(IPAddress destination, int width, int height, int framerate) {
     ensureLock();
     if (!camera_ready) {
         LOG_ERROR(kTag, "camera not initialized, not starting stream");
@@ -254,34 +289,69 @@ void start(int width, int height, int framerate) {
     framerate = constrain(framerate, 1, 60);
     min_frame_interval_ms = 1000 / framerate;
 
+    dest_ipv4 = static_cast<uint32_t>(destination);
+    dest_port = static_cast<uint16_t>(config.camera.video_port);
+
     sensor_t* sensor = esp_camera_sensor_get();
     if (sensor != nullptr) {
         sensor->set_framesize(sensor, frameSizeFor(width, height));
     }
 
-    if (!startServerLocked()) {
+    if (sending) {
+        // Already running: the new destination and format above are picked up
+        // on the next frame.
+        LOG_INFO(kTag, "restreaming %dx%d @ %d fps -> %s", width, height, framerate,
+                 streamTarget().c_str());
+        return;
+    }
+
+    if (!openSocketLocked()) {
         return;
     }
     streaming = true;
+    sending = true;
+    // Priority below the receive (6), watchdog (5) and telemetry (4) tasks:
+    // video is the one thing here that may be dropped without consequence.
+    if (xTaskCreate(sendLoop, "cam-video", 4096, nullptr, /*priority=*/3, nullptr) != pdPASS) {
+        LOG_ERROR(kTag, "could not start the video task");
+        streaming = false;
+        sending = false;
+        close(video_socket);
+        video_socket = -1;
+        return;
+    }
 
     LOG_INFO(kTag, "streaming %dx%d @ %d fps -> %s", width, height, framerate,
-             streamUrl().c_str());
+             streamTarget().c_str());
 }
 
 void stop() {
     ensureLock();
     Lock guard;
-    stopServerLocked();
+    if (!sending) {
+        return;
+    }
+    LOG_INFO(kTag, "stopping stream");
+    // The task notices on its next frame, then closes the socket and deletes
+    // itself. Wait for it, so a START arriving right after this STOP does not
+    // find a task that is still winding down.
+    streaming = false;
+    for (int waited_ms = 0; sending && waited_ms < 2000; waited_ms += 10) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    if (sending) {
+        LOG_WARN(kTag, "video task did not stop in time");
+    }
 }
 
 bool isStreaming() { return streaming; }
 
-String streamUrl() {
-    String url = "http://" + WiFi.softAPIP().toString();
-    if (config.camera.stream_port != 80) {
-        url += ":" + String(config.camera.stream_port);
+String streamTarget() {
+    const uint32_t ip = dest_ipv4;
+    if (ip == 0) {
+        return "udp/" + String(config.camera.video_port) + " (no ground station yet)";
     }
-    return url + "/stream";
+    return "udp://" + IPAddress(ip).toString() + ":" + String(dest_port);
 }
 
 }  // namespace camera_service

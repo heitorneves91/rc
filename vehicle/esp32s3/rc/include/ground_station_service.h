@@ -58,7 +58,7 @@ class GroundStationService {
     void handle(char* msg, IPAddress addr, uint16_t port);
     void handleMove(const MoveMessage& msg);
     void handleConf(const ConfigureMessage& msg, IPAddress addr);
-    void handleStartCamera(const ConfigureMessage& msg);
+    void handleStartCamera(const ConfigureMessage& msg, IPAddress addr);
     void telemetryLoop();
     void startTelemetry();
 

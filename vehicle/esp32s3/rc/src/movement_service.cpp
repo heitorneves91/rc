@@ -3,6 +3,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/task.h>
+#include <soc/soc_caps.h>
 
 #include "configuration.h"
 #include "logs.h"
@@ -15,7 +16,10 @@ constexpr const char* kTag = "movement_service";
 // Standard hobby-servo/ESC signalling: a 1000-2000 us pulse every 20 ms.
 constexpr int kServoFreqHz = 50;
 constexpr int kServoPeriodUs = 1000000 / kServoFreqHz;
-constexpr int kServoResolutionBits = 16;
+// 14 bits is the ESP32-S3's ceiling (SOC_LEDC_TIMER_BIT_WIDE_NUM); asking for
+// 16 makes ledcSetup() fail outright. At 50 Hz that is still ~1.2 us per step
+// over the 20 ms period, far finer than any ESC or servo resolves.
+constexpr int kServoResolutionBits = 14;
 constexpr uint32_t kServoMaxDuty = (1u << kServoResolutionBits) - 1;
 constexpr int kMinPulseUs = 1000;
 constexpr int kMaxPulseUs = 2000;
@@ -24,6 +28,21 @@ constexpr int kMaxPulseUs = 2000;
 // so the servos take channels 2 and 3, which share LEDC timer 1.
 constexpr int kThrottleChannel = 2;
 constexpr int kSteeringChannel = 3;
+
+// ledcSetup()/ledcAttachChannel() only report an over-wide resolution or an
+// out-of-range channel at boot, as a log line on a return value that is easy
+// to lose. Assert the chip's limits here instead, so a bad constant is a build
+// error on whichever core is compiling. (The capability macro was renamed
+// between IDF 4.x and 5.x.)
+#if defined(SOC_LEDC_TIMER_BIT_WIDTH)
+static_assert(kServoResolutionBits <= SOC_LEDC_TIMER_BIT_WIDTH,
+              "servo PWM resolution exceeds this chip's LEDC timer width");
+#elif defined(SOC_LEDC_TIMER_BIT_WIDE_NUM)
+static_assert(kServoResolutionBits <= SOC_LEDC_TIMER_BIT_WIDE_NUM,
+              "servo PWM resolution exceeds this chip's LEDC timer width");
+#endif
+static_assert(kThrottleChannel < SOC_LEDC_CHANNEL_NUM && kSteeringChannel < SOC_LEDC_CHANNEL_NUM,
+              "servo LEDC channel out of range for this chip");
 
 // Same mapping the Raspberry Pi build used:
 //   throttle -> 1000 + 10 * throttle us   (0..100 => 1000..2000 us)

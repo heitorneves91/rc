@@ -33,14 +33,22 @@ void setup() {
 
     // Arms the ESC (blocks for config.movement.arm_delay_s) and starts the
     // command-timeout watchdog.
-    movement_service::init();
+    if (!movement_service::init()) {
+        // No usable actuator outputs. Deliberately do not start the link: an
+        // operator who can send move commands and read back telemetry would
+        // have no way to tell that nothing reaches the ESC. The AP and the
+        // camera stay up, so the vehicle is still reachable for diagnosis.
+        LOG_ERROR(kTag, "movement init failed - link not started, vehicle cannot drive");
+        LOG_ERROR(kTag, "degraded: video only, on %s", camera_service::streamTarget().c_str());
+        return;
+    }
 
     if (!ground_station_service::service.start()) {
         LOG_ERROR(kTag, "ground-station link failed to start");
     }
 
-    LOG_INFO(kTag, "ready - join '%s' and drive; video at %s", config.wifi.ssid.c_str(),
-             camera_service::streamUrl().c_str());
+    LOG_INFO(kTag, "ready - join '%s' and drive; video on %s", config.wifi.ssid.c_str(),
+             camera_service::streamTarget().c_str());
 }
 
 void loop() {
