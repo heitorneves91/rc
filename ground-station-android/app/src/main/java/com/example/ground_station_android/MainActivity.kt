@@ -47,6 +47,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -61,6 +62,8 @@ import com.example.ground_station_android.vehicle.CameraStartParams
 import com.example.ground_station_android.vehicle.Steering
 import com.example.ground_station_android.vehicle.Throttle
 import com.example.ground_station_android.vehicle.VehicleService
+import com.example.ground_station_android.vehicle.WifiConnectionStatus
+import com.example.ground_station_android.vehicle.WifiService
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
@@ -76,6 +79,10 @@ class MainActivity : ComponentActivity() {
         windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
 
         setContent {
+            val context = LocalContext.current
+            val wifiService = remember(context) { WifiService(context.applicationContext) }
+            val wifiStatus by wifiService.connectionStatus.collectAsState()
+
             val vehicleService = remember { VehicleService() }
             val cameraService = remember { CameraService() }
             val telemetry by vehicleService.telemetry.collectAsState()
@@ -158,6 +165,49 @@ class MainActivity : ComponentActivity() {
                                     Alignment.CenterVertically
                                 )
                             ) {
+                                // Wi-Fi Connection
+                                Surface(
+                                    onClick = {
+                                        wifiService.connectToVehicleWifi(
+                                            onConnected = {
+                                                vehicleService.reopenSocket()
+                                            }
+                                        )
+                                    },
+                                    shape = RoundedCornerShape(24.dp),
+                                    color = Color.White.copy(alpha = 0.2f)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 10.dp
+                                        ),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        val (dotColor, statusText) = when (wifiStatus) {
+                                            WifiConnectionStatus.CONNECTED -> Color(0xFF4CAF50) to "rc-car CONNECTED"
+                                            WifiConnectionStatus.CONNECTING -> Color(0xFFFFB74D) to "CONNECTING..."
+                                            WifiConnectionStatus.FAILED -> Color(0xFFE57373) to "RETRY WI-FI"
+                                            WifiConnectionStatus.DISCONNECTED -> Color.White.copy(
+                                                alpha = 0.5f
+                                            ) to "CONNECT WI-FI"
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .background(dotColor, CircleShape)
+                                        )
+                                        Text(
+                                            text = statusText,
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.5.sp
+                                        )
+                                    }
+                                }
+
                                 // Camera Status
                                 if (isCameraActive) {
                                     Column(
