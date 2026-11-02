@@ -28,6 +28,12 @@ struct MovementConfig {
     // itself, independent of which link delivered (or stopped delivering)
     // commands.
     float command_timeout_s = 1.0f;
+
+    // Steering servo trim, in microseconds added to the 1500 us center, so
+    // that steering 0 points the horn straight up despite the spline not
+    // allowing a perfect mechanical fit. Positive = counter-clockwise when
+    // facing the horn (on most hobby servos a longer pulse turns CCW).
+    int steering_trim_us = 20;
 };
 
 struct CameraConfig {
@@ -41,6 +47,10 @@ struct CameraConfig {
     int video_port = 9999;
     // 10-63; lower is better quality and a bigger frame.
     int jpeg_quality = 12;
+    // Orientation, applied by the sensor itself (free). The camera is mounted
+    // upside down, so the image is flipped vertically.
+    bool vflip = true;
+    bool hmirror = false;
 };
 
 struct GroundStationConfig {

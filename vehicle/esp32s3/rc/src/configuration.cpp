@@ -32,12 +32,15 @@ void Configuration::load() {
     movement.steering_gpio = prefs.getInt("mv_steer_gpio", movement.steering_gpio);
     movement.arm_delay_s = prefs.getFloat("mv_arm_delay", movement.arm_delay_s);
     movement.command_timeout_s = prefs.getFloat("mv_cmd_tmout", movement.command_timeout_s);
+    movement.steering_trim_us = prefs.getInt("mv_steer_trim", movement.steering_trim_us);
 
     camera.width = prefs.getInt("cam_width", camera.width);
     camera.height = prefs.getInt("cam_height", camera.height);
     camera.framerate = prefs.getInt("cam_fps", camera.framerate);
     camera.video_port = prefs.getInt("cam_port", camera.video_port);
     camera.jpeg_quality = prefs.getInt("cam_quality", camera.jpeg_quality);
+    camera.vflip = prefs.getBool("cam_vflip", camera.vflip);
+    camera.hmirror = prefs.getBool("cam_hmirror", camera.hmirror);
 
     ground_station.listen_port = prefs.getInt("gs_port", ground_station.listen_port);
     ground_station.telemetry_interval_s =
@@ -65,12 +68,15 @@ void Configuration::save() {
     prefs.putInt("mv_steer_gpio", movement.steering_gpio);
     prefs.putFloat("mv_arm_delay", movement.arm_delay_s);
     prefs.putFloat("mv_cmd_tmout", movement.command_timeout_s);
+    prefs.putInt("mv_steer_trim", movement.steering_trim_us);
 
     prefs.putInt("cam_width", camera.width);
     prefs.putInt("cam_height", camera.height);
     prefs.putInt("cam_fps", camera.framerate);
     prefs.putInt("cam_port", camera.video_port);
     prefs.putInt("cam_quality", camera.jpeg_quality);
+    prefs.putBool("cam_vflip", camera.vflip);
+    prefs.putBool("cam_hmirror", camera.hmirror);
 
     prefs.putInt("gs_port", ground_station.listen_port);
     prefs.putFloat("gs_tele_int", ground_station.telemetry_interval_s);

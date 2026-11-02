@@ -63,9 +63,11 @@ layout can grow without bricking already-flashed devices. `config.save()`
 persists.
 
 **`movement_service`** — throttle/steering ints map to servo pulse widths
-(`1000 + 10*throttle` µs, `1500 + 5*steering` µs), emitted by LEDC at 50 Hz,
-14-bit (the S3's maximum duty resolution — 16 makes `ledcSetup` fail), and
-clamped to 1000–2000 µs. Owns the **failsafe**: a watchdog task cuts throttle
+(`1000 + 10*throttle` µs; steering `1500 + steering_trim_us - 6.25*steering` µs,
+negated because the linkage is reversed and 25% wider than the Pi build),
+emitted by LEDC at 50 Hz, 14-bit (the S3's maximum duty resolution — 16 makes
+`ledcSetup` fail), and clamped to 1000–2000 µs for the ESC, 800–2200 µs for the
+steering servo. Owns the **failsafe**: a watchdog task cuts throttle
 to 0 if no command arrives within
 `config.movement.command_timeout_s`. This deliberately lives here, not in the
 link layer, so *any* caller that stops feeding commands stops the vehicle.

@@ -234,9 +234,19 @@ data class TelemetryMessage(
 
 data class CameraStartParams(val width: Int, val height: Int, val framerate: Int) {
     init {
-        require(width in 640..2592)
-        require(height in 480..1944)
-        require(framerate in 1..90)
+        require(width in MIN_WIDTH..MAX_WIDTH)
+        require(height in MIN_HEIGHT..MAX_HEIGHT)
+        require(framerate in MIN_FRAMERATE..MAX_FRAMERATE)
+    }
+
+    companion object {
+        // 320x240 is the smallest frame size the vehicle firmware offers.
+        const val MIN_WIDTH = 320
+        const val MAX_WIDTH = 2592
+        const val MIN_HEIGHT = 240
+        const val MAX_HEIGHT = 1944
+        const val MIN_FRAMERATE = 1
+        const val MAX_FRAMERATE = 90
     }
 
     override fun toString(): String {
@@ -256,4 +266,21 @@ value class Steering(val value: Int) {
     init {
         require(value in -100..100)
     }
+}
+
+/**
+ * Starting points for the XIAO ESP32-S3 Sense: an OV2640 behind a small WiFi
+ * antenna. The OV2640 only reaches ~15 fps at 720p and above but runs near
+ * 25-30 fps at SVGA and below, and the soft AP sustains a few Mbps of UDP in
+ * practice, so frame rate is kept over resolution - it matters more for
+ * driving. Sizes are ones the sensor supports natively (the firmware rounds
+ * anything else down). Rough rates assume the default JPEG quality (12).
+ */
+enum class CameraPreset(val label: String, val params: CameraStartParams) {
+    // 720p puts the OV2640 in its full-resolution mode, capped at ~15 fps, so
+    // this trades frame rate for detail; it needs a clean, close link.
+    VERY_STRONG("Very strong", CameraStartParams(1280, 720, 15)), // ~13 Mbps
+    STRONG("Strong", CameraStartParams(800, 600, 25)),  // ~12 Mbps
+    AVERAGE("Average", CameraStartParams(640, 480, 20)), // ~7 Mbps
+    WEAK("Weak", CameraStartParams(480, 320, 15)),      // ~3.5 Mbps
 }

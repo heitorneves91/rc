@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -22,6 +23,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,6 +32,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,6 +62,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.ground_station_android.ui.theme.GroundstationandroidTheme
 import com.example.ground_station_android.vehicle.CameraService
+import com.example.ground_station_android.vehicle.CameraPreset
 import com.example.ground_station_android.vehicle.CameraStartParams
 import com.example.ground_station_android.vehicle.Steering
 import com.example.ground_station_android.vehicle.Throttle
@@ -94,7 +99,7 @@ class MainActivity : ComponentActivity() {
 
             var showCameraSettings by remember { mutableStateOf(false) }
             var cameraParams by remember {
-                mutableStateOf(CameraStartParams(width = 1280, height = 720, framerate = 30))
+                mutableStateOf(CameraPreset.AVERAGE.params)
             }
 
             if (showCameraSettings) {
@@ -391,11 +396,41 @@ fun CameraSettingsDialog(
         onDismissRequest = onDismiss,
         title = { Text("Camera Settings") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            // Landscape-only app: presets plus fields are taller than the
+            // screen, so the content must scroll to reach the manual fields.
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                Text("Signal preset", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                CameraPreset.entries.chunked(2).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        row.forEach { preset ->
+                            OutlinedButton(
+                                onClick = {
+                                    width = preset.params.width.toString()
+                                    height = preset.params.height.toString()
+                                    framerate = preset.params.framerate.toString()
+                                },
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(preset.label, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        "${preset.params.width}x${preset.params.height}",
+                                        fontSize = 10.sp
+                                    )
+                                    Text("${preset.params.framerate} fps", fontSize = 10.sp)
+                                }
+                            }
+                        }
+                    }
+                }
                 OutlinedTextField(
                     value = width,
                     onValueChange = { width = it },
-                    label = { Text("Width (640-2592)") },
+                    label = { Text("Width (${CameraStartParams.MIN_WIDTH}-${CameraStartParams.MAX_WIDTH})") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -403,7 +438,7 @@ fun CameraSettingsDialog(
                 OutlinedTextField(
                     value = height,
                     onValueChange = { height = it },
-                    label = { Text("Height (480-1944)") },
+                    label = { Text("Height (${CameraStartParams.MIN_HEIGHT}-${CameraStartParams.MAX_HEIGHT})") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -411,7 +446,7 @@ fun CameraSettingsDialog(
                 OutlinedTextField(
                     value = framerate,
                     onValueChange = { framerate = it },
-                    label = { Text("Framerate (1-90)") },
+                    label = { Text("Framerate (${CameraStartParams.MIN_FRAMERATE}-${CameraStartParams.MAX_FRAMERATE})") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -427,9 +462,9 @@ fun CameraSettingsDialog(
 
                     onConfirm(
                         CameraStartParams(
-                            w.coerceIn(640, 2592),
-                            h.coerceIn(480, 1944),
-                            f.coerceIn(1, 90)
+                            w.coerceIn(CameraStartParams.MIN_WIDTH, CameraStartParams.MAX_WIDTH),
+                            h.coerceIn(CameraStartParams.MIN_HEIGHT, CameraStartParams.MAX_HEIGHT),
+                            f.coerceIn(CameraStartParams.MIN_FRAMERATE, CameraStartParams.MAX_FRAMERATE)
                         )
                     )
                 }

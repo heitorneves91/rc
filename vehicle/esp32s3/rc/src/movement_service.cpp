@@ -23,6 +23,11 @@ constexpr int kServoResolutionBits = 14;
 constexpr uint32_t kServoMaxDuty = (1u << kServoResolutionBits) - 1;
 constexpr int kMinPulseUs = 1000;
 constexpr int kMaxPulseUs = 2000;
+// The steering servo is driven past the 1000-2000 us band (see the steering
+// mapping below); servos accept roughly 500-2500 us, the ESC does not, so the
+// wider limits apply to the steering channel only.
+constexpr int kSteeringMinPulseUs = 800;
+constexpr int kSteeringMaxPulseUs = 2200;
 
 // LEDC timer 0 / channel 0 belong to the camera's XCLK (see camera_service),
 // so the servos take channels 2 and 3, which share LEDC timer 1.
@@ -44,13 +49,18 @@ static_assert(kServoResolutionBits <= SOC_LEDC_TIMER_BIT_WIDE_NUM,
 static_assert(kThrottleChannel < SOC_LEDC_CHANNEL_NUM && kSteeringChannel < SOC_LEDC_CHANNEL_NUM,
               "servo LEDC channel out of range for this chip");
 
-// Same mapping the Raspberry Pi build used:
 //   throttle -> 1000 + 10 * throttle us   (0..100 => 1000..2000 us)
-//   steering -> 1500 +  5 * steering us   (-100..100 => 1000..2000 us)
+//   steering -> 1500 + trim - 6.25 * steering us
+//               (-100..100 => 2125..875 us, before trim)
+// Steering is 25% wider than the Pi build's 5 us/unit, and negated: the servo
+// linkage turns the wheels the opposite way to what the ground station means.
+// The scale is kept as a fraction (25/4) to stay in integer math.
 constexpr int kThrottleBaseUs = 1000;
 constexpr int kThrottleScaleUs = 10;
 constexpr int kSteeringCenterUs = 1500;
-constexpr int kSteeringScaleUs = 5;
+constexpr int kSteeringScaleNum = 25;
+constexpr int kSteeringScaleDen = 4;
+constexpr int kSteeringDirection = -1;
 
 bool initialized = false;
 
@@ -91,10 +101,10 @@ bool attachChannel(int pin, int channel) {
 #endif
 }
 
-void writePulseUs(int channel, int pulse_us) {
+void writePulseUs(int channel, int pulse_us, int min_us, int max_us) {
     // The Pi build trusted the caller's range; clamping here means a bad or
     // hostile packet can never ask the ESC for an out-of-band pulse.
-    pulse_us = constrain(pulse_us, kMinPulseUs, kMaxPulseUs);
+    pulse_us = constrain(pulse_us, min_us, max_us);
     const uint32_t duty =
         static_cast<uint32_t>((static_cast<uint64_t>(pulse_us) * kServoMaxDuty) / kServoPeriodUs);
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
@@ -105,13 +115,17 @@ void writePulseUs(int channel, int pulse_us) {
 }
 
 void applyThrottle(int throttle) {
-    writePulseUs(kThrottleChannel, kThrottleBaseUs + kThrottleScaleUs * throttle);
+    writePulseUs(kThrottleChannel, kThrottleBaseUs + kThrottleScaleUs * throttle, kMinPulseUs,
+                 kMaxPulseUs);
     StateLock lock;
     current_throttle = throttle;
 }
 
 void applySteering(int steering) {
-    writePulseUs(kSteeringChannel, kSteeringCenterUs + kSteeringScaleUs * steering);
+    const int offset_us = kSteeringDirection * steering * kSteeringScaleNum / kSteeringScaleDen;
+    writePulseUs(kSteeringChannel,
+                 kSteeringCenterUs + config.movement.steering_trim_us + offset_us,
+                 kSteeringMinPulseUs, kSteeringMaxPulseUs);
     StateLock lock;
     current_steering = steering;
 }

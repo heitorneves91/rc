@@ -110,6 +110,20 @@ framesize_t frameSizeFor(int width, int height) {
     return FRAMESIZE_QVGA;
 }
 
+// Resize, then re-assert the orientation. The flip is done by the sensor
+// itself (a register bit), so it costs no cycles here or on the phone; it is
+// re-applied after every resize in case the resolution tables touch it.
+// The camera is mounted upside down, hence the vertical flip.
+void configureSensor(int width, int height) {
+    sensor_t* sensor = esp_camera_sensor_get();
+    if (sensor == nullptr) {
+        return;
+    }
+    sensor->set_framesize(sensor, frameSizeFor(width, height));
+    sensor->set_vflip(sensor, config.camera.vflip ? 1 : 0);
+    sensor->set_hmirror(sensor, config.camera.hmirror ? 1 : 0);
+}
+
 // Send one chunk, retrying once if lwIP is momentarily out of buffers - a
 // burst of chunks can outrun the WiFi driver's tx queue. Returns false if the
 // chunk was dropped.
@@ -269,10 +283,7 @@ bool init() {
 
     camera_ready = true;
 
-    sensor_t* sensor = esp_camera_sensor_get();
-    if (sensor != nullptr) {
-        sensor->set_framesize(sensor, frameSizeFor(config.camera.width, config.camera.height));
-    }
+    configureSensor(config.camera.width, config.camera.height);
     LOG_INFO(kTag, "camera ready");
     return true;
 }
@@ -292,10 +303,7 @@ void start(IPAddress destination, int width, int height, int framerate) {
     dest_ipv4 = static_cast<uint32_t>(destination);
     dest_port = static_cast<uint16_t>(config.camera.video_port);
 
-    sensor_t* sensor = esp_camera_sensor_get();
-    if (sensor != nullptr) {
-        sensor->set_framesize(sensor, frameSizeFor(width, height));
-    }
+    configureSensor(width, height);
 
     if (sending) {
         // Already running: the new destination and format above are picked up
