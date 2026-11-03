@@ -9,9 +9,11 @@ import android.util.Log
 import android.view.Surface
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
@@ -23,6 +25,7 @@ import kotlinx.coroutines.yield
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
+import java.net.SocketException
 import java.net.SocketTimeoutException
 import kotlin.coroutines.coroutineContext
 
@@ -86,6 +89,12 @@ class CameraService {
                 }
 
                 coroutineScope {
+                    // Close the socket immediately on cancellation so a blocked
+                    // socket.receive() in receiveLoop unblocks right away
+                    // instead of holding the port and mutex until soTimeout.
+                    coroutineContext[Job]?.invokeOnCompletion {
+                        socket.close()
+                    }
                     launch(Dispatchers.Default) { renderLoop(frames, surface) }
                     launch { receiveLoop(socket, frames) }
                 }
@@ -99,9 +108,24 @@ class CameraService {
                     _bitrateMbps.value = 0f
                     frames.close()
                     socket?.close()
+                    clearSurface(surface)
                     Log.d(TAG, "Camera cleaned up")
                 }
             }
+        }
+    }
+
+    fun clearSurface(surface: Surface) {
+        if (!surface.isValid) return
+        try {
+            val canvas = surface.lockCanvas(null)
+            try {
+                canvas.drawColor(Color.BLACK)
+            } finally {
+                surface.unlockCanvasAndPost(canvas)
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Could not clear surface", e)
         }
     }
 
@@ -132,6 +156,10 @@ class CameraService {
                 _bitrateMbps.value = 0f
                 bytesInInterval = 0
                 lastIntervalTime = System.currentTimeMillis()
+                continue
+            } catch (e: SocketException) {
+                if (!coroutineContext.isActive || socket.isClosed) break
+                yield()
                 continue
             } catch (e: Exception) {
                 if (coroutineContext.isActive) yield()
@@ -177,6 +205,11 @@ class CameraService {
             }
             reusable = bitmap
 
+            if (!surface.isValid) {
+                delay(16)
+                continue
+            }
+
             try {
                 val canvas = surface.lockCanvas(null)
                 try {
@@ -186,12 +219,11 @@ class CameraService {
                     surface.unlockCanvasAndPost(canvas)
                 }
             } catch (e: IllegalArgumentException) {
-                // Surface released underneath us (view detached).
-                Log.d(TAG, "surface no longer accepting frames", e)
-                return
+                Log.d(TAG, "surface temporarily unavailable", e)
+                delay(16)
             } catch (e: IllegalStateException) {
-                Log.d(TAG, "surface no longer accepting frames", e)
-                return
+                Log.d(TAG, "surface temporarily unavailable", e)
+                delay(16)
             }
         }
     }

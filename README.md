@@ -109,7 +109,8 @@ Messages follow `<type>:<seq>,<field>,<field>` where `seq` is a monotonic counte
 | `conf:<seq>,GROUND_HELLO,null` | Ground → Vehicle | Resets the vehicle's last-seen `seq` counter upon socket (re)connection. |
 | `conf:<seq>,START_CAMERA,<w>,<h>,<fps>` | Ground → Vehicle | Starts/reconfigures MJPEG streaming to the sender's IP on UDP `:9999`. |
 | `conf:<seq>,STOP_CAMERA,null` | Ground → Vehicle | Stops the MJPEG video stream. |
-| `tele:<seq>,<throttle>,<steering>` | Vehicle → Ground | Periodic (4 Hz) actuator state feedback. |
+| `conf:<seq>,STEERING_TRIM,<trim_us>` | Ground → Vehicle | Sets the steering center offset in $\mu\text{s}$ (`-500..500`), applies it immediately, and saves it to NVS flash. |
+| `tele:<seq>,<throttle>,<steering>,<steering_trim_us>` | Vehicle → Ground | Periodic (4 Hz) actuator and steering-trim state feedback. |
 
 ### Video Stream (`UDP :9999`, Chunked MJPEG)
 Each JPEG frame is split into `1400`-byte chunks prefixed by a 16-byte big-endian header so every datagram fits within the 1500-byte Wi-Fi MTU without IP fragmentation:

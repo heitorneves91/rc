@@ -19,6 +19,12 @@ import kotlin.time.Duration.Companion.milliseconds
 
 class VehicleService {
 
+    companion object {
+        const val MIN_STEERING_TRIM_US = -500
+        const val MAX_STEERING_TRIM_US = 500
+        const val DEFAULT_STEERING_TRIM_US = 20
+    }
+
     private val DEFAULT_HOST = "192.168.4.1"
     private val DEFAULT_PORT = 8888
 
@@ -62,6 +68,11 @@ class VehicleService {
 
     fun stopCamera() {
         configure(Configuration.STOP_CAMERA)
+    }
+
+    fun setSteeringTrim(trimUs: Int) {
+        val clamped = trimUs.coerceIn(MIN_STEERING_TRIM_US, MAX_STEERING_TRIM_US)
+        configure(Configuration.STEERING_TRIM, clamped.toString())
     }
 
     fun configure(configuration: Configuration, value: String? = null) {
@@ -130,8 +141,10 @@ class VehicleService {
 
                     _latestTelemetryMessage.value = TelemetryMessage(
                         seq = recvSeq,
-                        Throttle(split[1].toIntOrNull() ?: 0),
-                        Steering(split[2].toIntOrNull() ?: 0)
+                        throttle = Throttle(split[1].trim().toIntOrNull() ?: 0),
+                        steering = Steering(split[2].trim().toIntOrNull() ?: 0),
+                        steeringTrimUs = split.getOrNull(3)?.trim()?.toIntOrNull()
+                            ?: DEFAULT_STEERING_TRIM_US
                     )
                 } catch (e: SocketException) {
                     break // socket closed
@@ -206,6 +219,7 @@ enum class Configuration {
     GROUND_HELLO,
     START_CAMERA,
     STOP_CAMERA,
+    STEERING_TRIM,
 }
 
 data class ConfigureMessage(
@@ -224,11 +238,12 @@ data class TelemetryMessage(
     val seq: Long,
     val throttle: Throttle,
     val steering: Steering,
+    val steeringTrimUs: Int = VehicleService.DEFAULT_STEERING_TRIM_US,
 ) {
     val type = MessageType.tele
 
     override fun toString(): String {
-        return "$type:$seq,${throttle.value},${steering.value}"
+        return "$type:$seq,${throttle.value},${steering.value},$steeringTrimUs"
     }
 }
 

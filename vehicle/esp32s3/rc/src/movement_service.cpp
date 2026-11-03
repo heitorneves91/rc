@@ -61,6 +61,7 @@ constexpr int kSteeringCenterUs = 1500;
 constexpr int kSteeringScaleNum = 25;
 constexpr int kSteeringScaleDen = 4;
 constexpr int kSteeringDirection = -1;
+constexpr int kMaxSteeringTrimUs = 500;
 
 bool initialized = false;
 
@@ -204,6 +205,22 @@ void setSteering(int steering, bool force) {
     }
     feedWatchdog();
     applySteering(steering);
+}
+
+void setSteeringTrimUs(int trim_us) {
+    ensureMutex();
+    trim_us = constrain(trim_us, -kMaxSteeringTrimUs, kMaxSteeringTrimUs);
+    int steering = 0;
+    {
+        StateLock lock;
+        config.movement.steering_trim_us = trim_us;
+        steering = current_steering;
+    }
+    config.save();
+    if (initialized) {
+        applySteering(steering);
+    }
+    LOG_INFO(kTag, "steering trim set to %d us (saved to NVS)", trim_us);
 }
 
 void getState(int& throttle, int& steering) {

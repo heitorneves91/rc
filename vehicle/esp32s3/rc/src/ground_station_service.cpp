@@ -17,6 +17,7 @@ ConfigurationCommand parseConfiguration(const char* name) {
     if (strcmp(name, "GROUND_HELLO") == 0) return ConfigurationCommand::GroundHello;
     if (strcmp(name, "START_CAMERA") == 0) return ConfigurationCommand::StartCamera;
     if (strcmp(name, "STOP_CAMERA") == 0) return ConfigurationCommand::StopCamera;
+    if (strcmp(name, "STEERING_TRIM") == 0) return ConfigurationCommand::SteeringTrim;
     return ConfigurationCommand::Unknown;
 }
 
@@ -165,6 +166,9 @@ void GroundStationService::handleConf(const ConfigureMessage& msg, IPAddress add
             // its socket, so a reconnect must reset ours too - otherwise every
             // command from the new session looks stale and is dropped.
             last_move_seq_ = -1;
+            if (telemetry_task_ != nullptr) {
+                xTaskNotifyGive(telemetry_task_);
+            }
             break;
         case ConfigurationCommand::StartCamera:
             // Video is pushed, so the camera needs somewhere to push it: the
@@ -173,6 +177,9 @@ void GroundStationService::handleConf(const ConfigureMessage& msg, IPAddress add
             break;
         case ConfigurationCommand::StopCamera:
             camera_service::stop();
+            break;
+        case ConfigurationCommand::SteeringTrim:
+            handleSteeringTrim(msg);
             break;
         case ConfigurationCommand::Unknown:
             LOG_WARN(kTag, "unknown configuration command");
@@ -198,6 +205,19 @@ void GroundStationService::handleStartCamera(const ConfigureMessage& msg, IPAddr
     camera_service::start(addr, width, height, framerate);
 }
 
+void GroundStationService::handleSteeringTrim(const ConfigureMessage& msg) {
+    int trim_us = 0;
+    if (msg.value.length() == 0 || sscanf(msg.value.c_str(), "%d", &trim_us) != 1) {
+        LOG_WARN(kTag, "bad steering trim '%s', ignoring", msg.value.c_str());
+        return;
+    }
+
+    movement_service::setSteeringTrimUs(trim_us);
+    if (telemetry_task_ != nullptr) {
+        xTaskNotifyGive(telemetry_task_);
+    }
+}
+
 void GroundStationService::startTelemetry() {
     if (telemetry_task_ != nullptr) {
         return;
@@ -209,8 +229,13 @@ void GroundStationService::telemetryLoop() {
     // Periodically report the vehicle's current state - but only once a ground
     // station has announced itself.
     while (!stop_) {
-        vTaskDelay(pdMS_TO_TICKS(
-            static_cast<uint32_t>(config.ground_station.telemetry_interval_s * 1000.0f)));
+        ulTaskNotifyTake(
+            pdTRUE,
+            pdMS_TO_TICKS(
+                static_cast<uint32_t>(config.ground_station.telemetry_interval_s * 1000.0f)));
+        if (stop_) {
+            break;
+        }
         if (!ground_station_known_) {
             continue;
         }
@@ -231,8 +256,8 @@ void GroundStationService::sendTelemetry(int throttle, int steering) {
     telemetry_seq_++;
 
     char msg[64];
-    const int len =
-        snprintf(msg, sizeof(msg), "tele:%ld,%d,%d", telemetry_seq_, throttle, steering);
+    const int len = snprintf(msg, sizeof(msg), "tele:%ld,%d,%d,%d", telemetry_seq_, throttle,
+                             steering, config.movement.steering_trim_us);
 
     socket_.beginPacket(ground_station_addr_, ground_station_port_);
     socket_.write(reinterpret_cast<const uint8_t*>(msg), len);

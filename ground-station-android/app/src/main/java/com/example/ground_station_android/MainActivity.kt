@@ -1,9 +1,9 @@
 package com.example.ground_station_android
 
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -69,6 +69,7 @@ import com.example.ground_station_android.vehicle.Throttle
 import com.example.ground_station_android.vehicle.VehicleService
 import com.example.ground_station_android.vehicle.WifiConnectionStatus
 import com.example.ground_station_android.vehicle.WifiService
+import kotlinx.coroutines.delay
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {
@@ -102,6 +103,31 @@ class MainActivity : ComponentActivity() {
                 mutableStateOf(CameraPreset.AVERAGE.params)
             }
 
+            var steeringTrimUs by remember {
+                mutableStateOf(VehicleService.DEFAULT_STEERING_TRIM_US)
+            }
+            var lastTrimCommandTimeMs by remember { mutableStateOf(0L) }
+            var showSteeringTrimDialog by remember { mutableStateOf(false) }
+
+            LaunchedEffect(telemetry?.steeringTrimUs) {
+                val remoteTrim = telemetry?.steeringTrimUs ?: return@LaunchedEffect
+                val elapsed = SystemClock.elapsedRealtime() - lastTrimCommandTimeMs
+                if (elapsed < 500L) {
+                    delay(500L - elapsed)
+                }
+                telemetry?.steeringTrimUs?.let { steeringTrimUs = it }
+            }
+
+            val updateSteeringTrim: (Int) -> Unit = { newTrim ->
+                val clamped = newTrim.coerceIn(
+                    VehicleService.MIN_STEERING_TRIM_US,
+                    VehicleService.MAX_STEERING_TRIM_US
+                )
+                steeringTrimUs = clamped
+                lastTrimCommandTimeMs = SystemClock.elapsedRealtime()
+                vehicleService.setSteeringTrim(clamped)
+            }
+
             if (showCameraSettings) {
                 CameraSettingsDialog(
                     initialParams = cameraParams,
@@ -109,7 +135,18 @@ class MainActivity : ComponentActivity() {
                     onConfirm = {
                         cameraParams = it
                         showCameraSettings = false
+                        if (isCameraActive) {
+                            vehicleService.startCamera(it)
+                        }
                     }
+                )
+            }
+
+            if (showSteeringTrimDialog) {
+                SteeringTrimDialog(
+                    currentTrimUs = steeringTrimUs,
+                    onApplyTrim = updateSteeringTrim,
+                    onDismiss = { showSteeringTrimDialog = false }
                 )
             }
 
@@ -163,10 +200,11 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .weight(0.5f)
                                     .fillMaxHeight()
-                                    .padding(vertical = 24.dp),
+                                    .padding(vertical = 12.dp)
+                                    .verticalScroll(rememberScrollState()),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(
-                                    16.dp,
+                                    10.dp,
                                     Alignment.CenterVertically
                                 )
                             ) {
@@ -300,7 +338,64 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
 
-                                Spacer(modifier = Modifier.height(32.dp))
+                                // Steering Trim (Offset) Controls
+                                Row(
+                                    modifier = Modifier
+                                        .background(
+                                            Color.White.copy(alpha = 0.2f),
+                                            RoundedCornerShape(24.dp)
+                                        )
+                                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IconButton(
+                                        onClick = { updateSteeringTrim(steeringTrimUs - 5) },
+                                        modifier = Modifier.size(36.dp),
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            contentColor = Color.White
+                                        )
+                                    ) {
+                                        Text("−", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+
+                                    Surface(
+                                        onClick = { showSteeringTrimDialog = true },
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color.Transparent
+                                    ) {
+                                        Column(
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                                            horizontalAlignment = Alignment.CenterHorizontally
+                                        ) {
+                                            Text(
+                                                "STEER TRIM",
+                                                fontSize = 8.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White.copy(alpha = 0.6f),
+                                                letterSpacing = 0.5.sp
+                                            )
+                                            Text(
+                                                String.format(Locale.US, "%+d µs", steeringTrimUs),
+                                                fontSize = 12.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
+                                            )
+                                        }
+                                    }
+
+                                    IconButton(
+                                        onClick = { updateSteeringTrim(steeringTrimUs + 5) },
+                                        modifier = Modifier.size(36.dp),
+                                        colors = IconButtonDefaults.iconButtonColors(
+                                            contentColor = Color.White
+                                        )
+                                    ) {
+                                        Text("+", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(4.dp))
 
                                 Text(
                                     "TELEMETRY",
@@ -481,13 +576,133 @@ fun CameraSettingsDialog(
 }
 
 @Composable
+fun SteeringTrimDialog(
+    currentTrimUs: Int,
+    onApplyTrim: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var trimInput by remember(currentTrimUs) { mutableStateOf(currentTrimUs.toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Steering Trim (Offset)") },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    "Adjusts the steering servo center offset in microseconds (µs) and saves it to the vehicle's NVS flash memory.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    String.format(
+                        Locale.US,
+                        "Current: %+d µs (center pulse %d µs)",
+                        currentTrimUs,
+                        1500 + currentTrimUs
+                    ),
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    listOf(-25, -5, -1, 1, 5, 25).forEach { step ->
+                        OutlinedButton(
+                            onClick = {
+                                val next = (currentTrimUs + step).coerceIn(
+                                    VehicleService.MIN_STEERING_TRIM_US,
+                                    VehicleService.MAX_STEERING_TRIM_US
+                                )
+                                trimInput = next.toString()
+                                onApplyTrim(next)
+                            },
+                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 6.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                String.format(Locale.US, "%+d", step),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            trimInput = "0"
+                            onApplyTrim(0)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Zero (0 µs)", fontSize = 12.sp)
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            val def = VehicleService.DEFAULT_STEERING_TRIM_US
+                            trimInput = def.toString()
+                            onApplyTrim(def)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            String.format(Locale.US, "Default (%+d µs)", VehicleService.DEFAULT_STEERING_TRIM_US),
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+                OutlinedTextField(
+                    value = trimInput,
+                    onValueChange = { trimInput = it },
+                    label = {
+                        Text(
+                            "Steering Trim µs (${VehicleService.MIN_STEERING_TRIM_US} to ${VehicleService.MAX_STEERING_TRIM_US})"
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    trimInput.trim().toIntOrNull()?.let { parsed ->
+                        onApplyTrim(parsed)
+                    }
+                    onDismiss()
+                }
+            ) {
+                Text("Save & Close")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
+
+@Composable
 fun CameraView(cameraService: CameraService, isStreaming: Boolean) {
     var surface by remember { mutableStateOf<android.view.Surface?>(null) }
+    var surfaceGeneration by remember { mutableStateOf(0) }
 
-    LaunchedEffect(isStreaming, surface) {
+    LaunchedEffect(isStreaming, surface, surfaceGeneration) {
         val s = surface
         if (isStreaming && s != null) {
             cameraService.startCamera(s)
+        } else if (!isStreaming && s != null) {
+            cameraService.clearSurface(s)
         }
     }
 
@@ -496,7 +711,9 @@ fun CameraView(cameraService: CameraService, isStreaming: Boolean) {
             SurfaceView(context).apply {
                 holder.addCallback(object : SurfaceHolder.Callback {
                     override fun surfaceCreated(holder: SurfaceHolder) {
+                        cameraService.clearSurface(holder.surface)
                         surface = holder.surface
+                        surfaceGeneration++
                     }
 
                     override fun surfaceChanged(
@@ -513,10 +730,7 @@ fun CameraView(cameraService: CameraService, isStreaming: Boolean) {
                 })
             }
         },
-        modifier = Modifier.fillMaxSize(),
-        update = { view ->
-            view.visibility = if (isStreaming) View.VISIBLE else View.INVISIBLE
-        }
+        modifier = Modifier.fillMaxSize()
     )
 }
 

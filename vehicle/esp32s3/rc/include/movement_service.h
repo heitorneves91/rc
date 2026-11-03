@@ -28,6 +28,11 @@ void shutdown();
 void setThrottle(int throttle, bool force = false);
 void setSteering(int steering, bool force = false);
 
+// Updates `config.movement.steering_trim_us`, persists it to NVS, and
+// immediately re-applies the current steering angle so the servo horn moves
+// to the new center without waiting for the next drive command.
+void setSteeringTrimUs(int trim_us);
+
 // Current (throttle, steering) as last written to the actuators.
 void getState(int& throttle, int& steering);
 

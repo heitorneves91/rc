@@ -10,9 +10,9 @@
 // `<type>:<seq>,<field>,<field>` where `seq` is a monotonically increasing
 // counter used to drop stale/reordered UDP packets:
 //
-//     move:<seq>,<throttle>,<steering>   ground -> vehicle, drive command
-//     conf:<seq>,<configuration>,<value> ground -> vehicle, e.g. GROUND_HELLO
-//     tele:<seq>,<throttle>,<steering>   vehicle -> ground, telemetry
+//     move:<seq>,<throttle>,<steering>                  ground -> vehicle, drive command
+//     conf:<seq>,<configuration>,<value>                ground -> vehicle, e.g. GROUND_HELLO
+//     tele:<seq>,<throttle>,<steering>,<steering_trim>  vehicle -> ground, telemetry
 #pragma once
 
 #include <Arduino.h>
@@ -22,7 +22,13 @@
 
 namespace ground_station_service {
 
-enum class ConfigurationCommand { GroundHello, StartCamera, StopCamera, Unknown };
+enum class ConfigurationCommand {
+    GroundHello,
+    StartCamera,
+    StopCamera,
+    SteeringTrim,
+    Unknown
+};
 
 struct MoveMessage {
     long seq = -1;
@@ -59,6 +65,7 @@ class GroundStationService {
     void handleMove(const MoveMessage& msg);
     void handleConf(const ConfigureMessage& msg, IPAddress addr);
     void handleStartCamera(const ConfigureMessage& msg, IPAddress addr);
+    void handleSteeringTrim(const ConfigureMessage& msg);
     void telemetryLoop();
     void startTelemetry();
 

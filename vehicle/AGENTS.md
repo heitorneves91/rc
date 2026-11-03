@@ -74,8 +74,8 @@ LEDC timer 0 / channel 0 belong to the camera's 20 MHz `XCLK`, so movement uses 
 | Message | Direction | Payload |
 | --- | --- | --- |
 | `move:<seq>,<throttle>,<steering>` | ground → vehicle | drive command (`throttle` `0..100`, `steering` `-100..100`), ~25 Hz |
-| `conf:<seq>,<configuration>,<value>` | ground → vehicle | `GROUND_HELLO`, `START_CAMERA` (optional `width,height,framerate`), `STOP_CAMERA` |
-| `tele:<seq>,<throttle>,<steering>` | vehicle → ground | telemetry, 4 Hz |
+| `conf:<seq>,<configuration>,<value>` | ground → vehicle | `GROUND_HELLO`, `START_CAMERA` (optional `width,height,framerate`), `STOP_CAMERA`, `STEERING_TRIM` (`trim_us` in `-500..500`, applied immediately and saved to NVS) |
+| `tele:<seq>,<throttle>,<steering>,<steering_trim_us>` | vehicle → ground | telemetry, 4 Hz (plus immediate push on `GROUND_HELLO` and `STEERING_TRIM`) |
 
 Video is the one message that is binary — see below.
 
