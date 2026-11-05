@@ -29,12 +29,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
@@ -44,6 +48,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +76,7 @@ import com.example.ground_station_android.vehicle.WifiConnectionStatus
 import com.example.ground_station_android.vehicle.WifiService
 import kotlinx.coroutines.delay
 import java.util.Locale
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
 
@@ -102,6 +108,9 @@ class MainActivity : ComponentActivity() {
             var cameraParams by remember {
                 mutableStateOf(CameraPreset.AVERAGE.params)
             }
+            var maxSpeedPercent by remember {
+                mutableStateOf(DEFAULT_MAX_SPEED_PERCENT)
+            }
 
             var steeringTrimUs by remember {
                 mutableStateOf(VehicleService.DEFAULT_STEERING_TRIM_US)
@@ -131,12 +140,15 @@ class MainActivity : ComponentActivity() {
             if (showCameraSettings) {
                 CameraSettingsDialog(
                     initialParams = cameraParams,
+                    initialMaxSpeedPercent = maxSpeedPercent,
                     onDismiss = { showCameraSettings = false },
-                    onConfirm = {
-                        cameraParams = it
+                    onConfirm = { newCameraParams, newMaxSpeedPercent ->
+                        val cameraChanged = newCameraParams != cameraParams
+                        cameraParams = newCameraParams
+                        maxSpeedPercent = newMaxSpeedPercent
                         showCameraSettings = false
-                        if (isCameraActive) {
-                            vehicleService.startCamera(it)
+                        if (isCameraActive && cameraChanged) {
+                            vehicleService.startCamera(newCameraParams)
                         }
                     }
                 )
@@ -168,6 +180,7 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier
                                     .weight(1f)
                                     .fillMaxHeight(),
+                                maxYValue = maxSpeedPercent,
                                 onMove = { _, y ->
                                     vehicleService.throttle(Throttle(y))
                                 }
@@ -414,7 +427,12 @@ class MainActivity : ComponentActivity() {
                                             color = Color.White.copy(alpha = 0.2f),
                                             fontSize = 8.sp
                                         )
-                                        TelemetryValue("THROTTLE", "${it.throttle.value}%")
+                                        val throttleLabel = if (maxSpeedPercent < MAX_SPEED_PERCENT) {
+                                            "THROTTLE (MAX $maxSpeedPercent%)"
+                                        } else {
+                                            "THROTTLE"
+                                        }
+                                        TelemetryValue(throttleLabel, "${it.throttle.value}%")
                                         TelemetryValue("STEERING", "${it.steering.value}%")
                                     }
                                 } ?: Text(
@@ -477,75 +495,175 @@ fun TelemetryValue(label: String, value: String) {
     }
 }
 
+const val MIN_SPEED_PERCENT = 1
+const val MAX_SPEED_PERCENT = 100
+const val DEFAULT_MAX_SPEED_PERCENT = 100
+
+/**
+ * Full-screen vertical drag sensitivity: dragging half the area height (50%)
+ * reaches 100% of the configured maximum throttle.
+ */
+const val BOTTOM_TO_TOP_POWER = 200f
+
+/**
+ * Horizontal steering drag sensitivity: 3x higher than vertical so the operator
+ * only needs to move their thumb ~1/6 of the area height left/right from center
+ * (1/3 of the area height total for -100% to +100% full lock-to-lock).
+ */
+const val LEFT_TO_RIGHT_POWER = 600f
+
+fun computeJoystickValues(
+    dx: Float,
+    dy: Float,
+    areaHeight: Float,
+    maxYValue: Int = MAX_SPEED_PERCENT
+): Pair<Int, Int> {
+    if (areaHeight <= 0f) return 0 to 0
+    val clampedMaxY = maxYValue.coerceIn(0, MAX_SPEED_PERCENT)
+    val xScale = LEFT_TO_RIGHT_POWER / areaHeight
+    val yScale = BOTTOM_TO_TOP_POWER / areaHeight
+
+    val dxScaled = (dx * xScale).coerceIn(-100f, 100f).roundToInt()
+    val normalizedY = (dy * yScale).coerceIn(0f, 100f)
+    val dyScaled = ((normalizedY * clampedMaxY) / 100f)
+        .roundToInt()
+        .coerceIn(0, clampedMaxY)
+
+    return dxScaled to dyScaled
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CameraSettingsDialog(
     initialParams: CameraStartParams,
+    initialMaxSpeedPercent: Int = DEFAULT_MAX_SPEED_PERCENT,
     onDismiss: () -> Unit,
-    onConfirm: (CameraStartParams) -> Unit
+    onConfirm: (CameraStartParams, Int) -> Unit
 ) {
+    var selectedTab by remember { mutableStateOf(0) }
     var width by remember { mutableStateOf(initialParams.width.toString()) }
     var height by remember { mutableStateOf(initialParams.height.toString()) }
     var framerate by remember { mutableStateOf(initialParams.framerate.toString()) }
+    var maxSpeedInput by remember { mutableStateOf(initialMaxSpeedPercent.toString()) }
+
+    val currentSpeedSliderValue = (maxSpeedInput.toIntOrNull() ?: initialMaxSpeedPercent)
+        .coerceIn(MIN_SPEED_PERCENT, MAX_SPEED_PERCENT)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Camera Settings") },
+        title = { Text("Settings") },
         text = {
-            // Landscape-only app: presets plus fields are taller than the
-            // screen, so the content must scroll to reach the manual fields.
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                Text("Signal preset", fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                CameraPreset.entries.chunked(2).forEach { row ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        row.forEach { preset ->
-                            OutlinedButton(
-                                onClick = {
-                                    width = preset.params.width.toString()
-                                    height = preset.params.height.toString()
-                                    framerate = preset.params.framerate.toString()
-                                },
-                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(preset.label, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                                    Text(
-                                        "${preset.params.width}x${preset.params.height}",
-                                        fontSize = 10.sp
-                                    )
-                                    Text("${preset.params.framerate} fps", fontSize = 10.sp)
+                PrimaryTabRow(selectedTabIndex = selectedTab) {
+                    Tab(
+                        selected = selectedTab == 0,
+                        onClick = { selectedTab = 0 },
+                        text = { Text("Camera") }
+                    )
+                    Tab(
+                        selected = selectedTab == 1,
+                        onClick = { selectedTab = 1 },
+                        text = { Text("Speed") }
+                    )
+                }
+
+                if (selectedTab == 0) {
+                    Text("Signal preset", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    CameraPreset.entries.chunked(2).forEach { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            row.forEach { preset ->
+                                OutlinedButton(
+                                    onClick = {
+                                        width = preset.params.width.toString()
+                                        height = preset.params.height.toString()
+                                        framerate = preset.params.framerate.toString()
+                                    },
+                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(preset.label, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                                        Text(
+                                            "${preset.params.width}x${preset.params.height}",
+                                            fontSize = 10.sp
+                                        )
+                                        Text("${preset.params.framerate} fps", fontSize = 10.sp)
+                                    }
                                 }
                             }
                         }
                     }
+                    OutlinedTextField(
+                        value = width,
+                        onValueChange = { width = it },
+                        label = { Text("Width (${CameraStartParams.MIN_WIDTH}-${CameraStartParams.MAX_WIDTH})") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = height,
+                        onValueChange = { height = it },
+                        label = { Text("Height (${CameraStartParams.MIN_HEIGHT}-${CameraStartParams.MAX_HEIGHT})") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = framerate,
+                        onValueChange = { framerate = it },
+                        label = { Text("Framerate (${CameraStartParams.MIN_FRAMERATE}-${CameraStartParams.MAX_FRAMERATE})") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Text(
+                        "Limits the maximum throttle percentage when dragging acceleration up and down.",
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        "Maximum Speed: $currentSpeedSliderValue%",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        listOf(20, 30, 50, 75, 100).forEach { preset ->
+                            OutlinedButton(
+                                onClick = { maxSpeedInput = preset.toString() },
+                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    "$preset%",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                    Slider(
+                        value = currentSpeedSliderValue.toFloat(),
+                        onValueChange = { maxSpeedInput = it.roundToInt().toString() },
+                        valueRange = MIN_SPEED_PERCENT.toFloat()..MAX_SPEED_PERCENT.toFloat(),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = maxSpeedInput,
+                        onValueChange = { maxSpeedInput = it },
+                        label = { Text("Max Speed % ($MIN_SPEED_PERCENT-$MAX_SPEED_PERCENT)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-                OutlinedTextField(
-                    value = width,
-                    onValueChange = { width = it },
-                    label = { Text("Width (${CameraStartParams.MIN_WIDTH}-${CameraStartParams.MAX_WIDTH})") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = height,
-                    onValueChange = { height = it },
-                    label = { Text("Height (${CameraStartParams.MIN_HEIGHT}-${CameraStartParams.MAX_HEIGHT})") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = framerate,
-                    onValueChange = { framerate = it },
-                    label = { Text("Framerate (${CameraStartParams.MIN_FRAMERATE}-${CameraStartParams.MAX_FRAMERATE})") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         },
         confirmButton = {
@@ -554,13 +672,16 @@ fun CameraSettingsDialog(
                     val w = width.toIntOrNull() ?: initialParams.width
                     val h = height.toIntOrNull() ?: initialParams.height
                     val f = framerate.toIntOrNull() ?: initialParams.framerate
+                    val maxSpeed = (maxSpeedInput.trim().toIntOrNull() ?: initialMaxSpeedPercent)
+                        .coerceIn(MIN_SPEED_PERCENT, MAX_SPEED_PERCENT)
 
                     onConfirm(
                         CameraStartParams(
                             w.coerceIn(CameraStartParams.MIN_WIDTH, CameraStartParams.MAX_WIDTH),
                             h.coerceIn(CameraStartParams.MIN_HEIGHT, CameraStartParams.MAX_HEIGHT),
                             f.coerceIn(CameraStartParams.MIN_FRAMERATE, CameraStartParams.MAX_FRAMERATE)
-                        )
+                        ),
+                        maxSpeed
                     )
                 }
             ) {
@@ -737,18 +858,12 @@ fun CameraView(cameraService: CameraService, isStreaming: Boolean) {
 @Composable
 fun JoystickArea(
     modifier: Modifier = Modifier,
+    maxYValue: Int = MAX_SPEED_PERCENT,
     onMove: (Int, Int) -> Unit,
     content: @Composable BoxScope.() -> Unit = {}
 ) {
-    /**
-     * This is vehicle received value if the user touched the bottom part of the screen and dragged
-     * to the top (full range).
-     */
-    val bottomToTopPower = 200f
-    val xMinValue = -100f
-    val xMaxValue = 100f
-    val yMinValue = 0.0f
-    val yMaxValue = 100f
+    val currentOnMove by rememberUpdatedState(onMove)
+    val currentMaxYValue by rememberUpdatedState(maxYValue)
 
     var startPosition by remember {
         mutableStateOf<Offset?>(null)
@@ -771,23 +886,26 @@ fun JoystickArea(
                     val dx = change.position.x - start.x
                     val dy = start.y - change.position.y
 
-                    val scale = bottomToTopPower / size.height.toFloat()
-                    val dxScaled = (dx * scale).coerceIn(xMinValue, xMaxValue).toInt()
-                    val dyScaled = (dy * scale).coerceIn(yMinValue, yMaxValue).toInt()
+                    val (dxScaled, dyScaled) = computeJoystickValues(
+                        dx = dx,
+                        dy = dy,
+                        areaHeight = size.height.toFloat(),
+                        maxYValue = currentMaxYValue
+                    )
 
-                    onMove(dxScaled, dyScaled)
+                    currentOnMove(dxScaled, dyScaled)
 
                     change.consume()
                 },
                 onDragEnd = {
                     startPosition = null
                     currentPosition = null
-                    onMove(0, 0)
+                    currentOnMove(0, 0)
                 },
                 onDragCancel = {
                     startPosition = null
                     currentPosition = null
-                    onMove(0, 0)
+                    currentOnMove(0, 0)
                 }
             )
         }
