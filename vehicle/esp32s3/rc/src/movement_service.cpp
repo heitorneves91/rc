@@ -50,16 +50,16 @@ static_assert(kThrottleChannel < SOC_LEDC_CHANNEL_NUM && kSteeringChannel < SOC_
               "servo LEDC channel out of range for this chip");
 
 //   throttle -> 1000 + 10 * throttle us   (0..100 => 1000..2000 us)
-//   steering -> 1500 + trim - 6.25 * steering us
-//               (-100..100 => 2125..875 us, before trim)
-// Steering is 25% wider than the Pi build's 5 us/unit, and negated: the servo
+//   steering -> 1500 + trim - 4.375 * steering us
+//               (-100..100 => 1937..1063 us, before trim)
+// Steering is 70% of the previous 6.25 us/unit mapping, and negated: the servo
 // linkage turns the wheels the opposite way to what the ground station means.
-// The scale is kept as a fraction (25/4) to stay in integer math.
+// The scale is kept as a fraction (35/8) to stay in integer math.
 constexpr int kThrottleBaseUs = 1000;
 constexpr int kThrottleScaleUs = 10;
 constexpr int kSteeringCenterUs = 1500;
-constexpr int kSteeringScaleNum = 25;
-constexpr int kSteeringScaleDen = 4;
+constexpr int kSteeringScaleNum = 35;
+constexpr int kSteeringScaleDen = 8;
 constexpr int kSteeringDirection = -1;
 constexpr int kMaxSteeringTrimUs = 500;
 

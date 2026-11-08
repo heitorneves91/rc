@@ -21,7 +21,7 @@ Because the onboard camera occupies GPIOs `10–18` and `38–48` as well as `LE
 | Signal | XIAO Pin | ESP32-S3 GPIO | LEDC Channel | LEDC Timer | Pulse Range | Mapping |
 | --- | --- | --- | --- | --- | --- | --- |
 | **ESC (Throttle)** | `D0` | `GPIO1` | Channel `2` | Timer `1` (50 Hz, 14-bit) | `1000–2000 µs` | `1000 + 10 * throttle` (`0..100`) |
-| **Steering Servo** | `D1` | `GPIO2` | Channel `3` | Timer `1` (50 Hz, 14-bit) | `800–2200 µs` | `1500 + trim - 6.25 * steering` (`-100..100`) |
+| **Steering Servo** | `D1` | `GPIO2` | Channel `3` | Timer `1` (50 Hz, 14-bit) | `800–2200 µs` | `1500 + trim - 4.375 * steering` (`-100..100`) |
 
 ### Electronics Board (`vehicle/board.diy`)
 The circuit layout (editable with [DIY Layout Creator](https://github.com/bancika/diy-layout-creator)) implements two protective stages on a `48.26 × 63.5 mm` perfboard:

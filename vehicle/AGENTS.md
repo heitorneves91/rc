@@ -51,7 +51,7 @@ Each service is a namespace with a header in `include/` and its implementation i
 
 **`movement_service`** — throttle/steering ints map to servo pulse widths:
 - **ESC / A2212 1000KV motor (`rl_motor_gpio = 1`)**: `1000 + 10 * throttle` µs (`0..100` → `1000..2000 µs`), clamped to `1000–2000 µs`. Holds `1000 µs` for `config.movement.arm_delay_s` (`2.0 s`) on `init()` so the brushless ESC arms cleanly before drive commands are accepted.
-- **Steering servo (`steering_gpio = 2`)**: `1500 + steering_trim_us - 6.25 * steering` µs (default `steering_trim_us = 20` µs; negated because the mechanical linkage is reversed, and 25% wider than a standard `5 µs/unit` mapping), clamped to `800–2200 µs`.
+- **Steering servo (`steering_gpio = 2`)**: `1500 + steering_trim_us - 4.375 * steering` µs (default `steering_trim_us = 20` µs; negated because the mechanical linkage is reversed, and 70% of the earlier `6.25 µs/unit` mapping), clamped to `800–2200 µs`.
 - Signals are emitted by LEDC at 50 Hz, 14-bit duty resolution (the ESP32-S3's ceiling `SOC_LEDC_TIMER_BIT_WIDE_NUM` — requesting 16 bits makes `ledcSetup` fail).
 - Owns the **failsafe**: a watchdog task (`priority = 5`) cuts throttle to `0` (`1000 µs`) if no command arrives within `config.movement.command_timeout_s` (`1.0 s`). This deliberately lives here, not in the link layer, so *any* caller that stops feeding commands stops the vehicle. Note the asymmetry: `setThrottle`/`setSteering` feed the watchdog, whereas `applyThrottle`/`applySteering` do not — the failsafe path uses `applyThrottle(0)` so it stays latched until a real command arrives.
 
