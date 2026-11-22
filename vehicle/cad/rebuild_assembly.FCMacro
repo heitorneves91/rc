@@ -1,0 +1,295 @@
+"""Rebuild the static visualization assembly from car.FCStd, without a solver.
+Run with Macro > Macros in FreeCAD. See ASSEMBLY.txt for coordinates/limits.
+"""
+import math
+import os
+from pathlib import Path
+import FreeCAD as App
+import Part
+
+# Set RC_CAD_DIR when running this macro outside its own directory.
+CAD = Path(os.environ.get('RC_CAD_DIR', str(Path(__file__).resolve().parent)))
+SOURCE = CAD / 'car.FCStd'
+OUTPUT = CAD / 'full_assembly.FCStd'
+V = App.Vector
+IDENTITY = App.Rotation()
+
+def rot(axis, angle):
+    return App.Rotation(V(*axis), angle)
+
+def pose(position=(0, 0, 0), rotation=None):
+    return App.Placement(V(*position), rotation or IDENTITY)
+
+def anchor(local, target, rotation=None):
+    r = rotation or IDENTITY
+    return App.Placement(V(*target) - r.multVec(V(*local)), r)
+
+def between(local_start, local_end, start, end, opening=None):
+    """Rigid placement about midpoints; never stretch source geometry."""
+    a, b, c, d = [V(*p) for p in (local_start, local_end, start, end)]
+    if opening is None:
+        r = App.Rotation(b-a, d-c)
+    else:
+        # These source links run along X and their socket mouths face +Z.
+        # Fix their roll explicitly; shortest-arc alignment alone leaves
+        # sockets facing away from the studs (and differs on the two sides).
+        x_axis = (d-c).normalize()
+        normal = V(*opening)
+        z_axis = (normal-x_axis*normal.dot(x_axis)).normalize()
+        y_axis = z_axis.cross(x_axis).normalize()
+        r = App.Rotation(x_axis, y_axis, z_axis, 'XZY')
+    return App.Placement((c+d)*0.5-r.multVec((a+b)*0.5), r)
+
+source = next((d for d in App.listDocuments().values()
+               if d.FileName and Path(d.FileName).resolve() == SOURCE.resolve()), None)
+opened_source = source is None
+if opened_source:
+    source = App.openDocument(str(SOURCE))
+# Do not recompute or save the source: use its saved final B-reps.
+existing = App.listDocuments().get('FullCarAssembly')
+if existing:
+    raise RuntimeError('Close FullCarAssembly before rebuilding it.')
+doc = App.newDocument('FullCarAssembly')
+doc.Label = 'RC car — full static assembly'
+root = doc.addObject('App::Part', 'Car')
+root.Label = 'Complete car (fixed placements, mm)'
+root.addProperty('App::PropertyString', 'AssemblyMode', 'Reference').AssemblyMode = 'Static B-rep snapshots; no joints, solver, external links or Python features'
+root.addProperty('App::PropertyString', 'Coordinates', 'Reference').Coordinates = 'X across car; +Y forward; +Z up; front chassis datum is origin'
+root.addProperty('App::PropertyLength', 'Wheelbase', 'Reference').Wheelbase = 268.5
+root.addProperty('App::PropertyString', 'SourceFile', 'Reference').SourceFile = 'car.FCStd (unchanged; rerun macro to refresh snapshots)'
+root.addProperty('App::PropertyString', 'Limitations', 'Reference').Limitations = 'Visualization pose; steering links and shock internals approximate; commercial wheel models are simplified; electronics/battery/fasteners absent from source are not invented'
+
+COLORS = {
+    'chassis': (0.18, 0.25, 0.31), 'arm': (0.15, 0.48, 0.62),
+    'knuckle': (0.85, 0.47, 0.15), 'steel': (0.68, 0.72, 0.77),
+    'wheel': (0.12, 0.13, 0.15), 'gear': (0.88, 0.68, 0.21),
+    'servo': (0.20, 0.28, 0.43), 'electronics': (0.25, 0.58, 0.38),
+}
+
+def group(name, label, placement=None):
+    g = doc.addObject('App::Part', name)
+    g.Label = label
+    if placement:
+        g.Placement = placement
+    root.addObject(g)
+    return g
+
+front = group('FrontModule', '01 Front suspension and steering')
+middle = group('MiddleModule', '02 Center chassis and equipment mounts', pose((0, -121, 5)))
+rear = group('RearModule', '03 Rear suspension and drivetrain', pose((0, -336, 0), rot((0,0,1),180)))
+parts = []
+cache = {}
+reflection = App.Matrix()
+reflection.A11 = -1
+
+def geometry(name):
+    if name not in cache:
+        o = source.getObject(name)
+        s = o.Shape.copy()
+        s.Placement = o.Placement.inverse().multiply(s.Placement)
+        if not s.isNull() and not s.isValid():
+            # The saved bellcrank fillet has invalid edge tolerances. Repair
+            # only the embedded copy; keep the source document untouched.
+            before = s.Volume
+            s.fix(0.00001, 0.000001, 0.001)
+            print('Repaired snapshot '+name+'; volume delta '+str(s.Volume-before)+' mm^3')
+        if s.isNull() or not s.isValid():
+            raise RuntimeError('Invalid saved source geometry: '+name)
+        cache[name] = s
+    return cache[name].copy()
+
+def add(g, name, source_name, placement=None, kind='steel', mirror=False, note=''):
+    p = placement or pose()
+    s = geometry(source_name)
+    if mirror:
+        s = s.mirror(V(0,0,0), V(1,0,0))
+        p = App.Placement(reflection * p.toMatrix() * reflection)
+    obj = doc.addObject('Part::Feature', name)
+    # Plain Part::Feature has no execute callback or solver dependency.
+    obj.Label = name.replace('_', ' ')
+    obj.Shape = s
+    obj.Placement = p
+    obj.addProperty('App::PropertyString','SourceBody','Reference').SourceBody = source_name+' / '+source.getObject(source_name).Label
+    obj.addProperty('App::PropertyBool','MirroredInstance','Reference').MirroredInstance = mirror
+    if note:
+        obj.addProperty('App::PropertyString','PlacementNote','Reference').PlacementNote = note
+    g.addObject(obj)
+    if App.GuiUp:
+        obj.ViewObject.ShapeColor = COLORS[kind]
+        obj.ViewObject.LineColor = (0.08,0.10,0.12)
+        obj.ViewObject.DisplayMode = 'Flat Lines'
+        obj.ViewObject.LineWidth = 1.0
+        obj.ViewObject.Deviation = 0.15
+        obj.ViewObject.AngularDeflection = 18
+    parts.append(obj)
+    return obj
+
+def pair(g, name, src, p, kind='steel', note=''):
+    # Rear module is rotated 180 degrees; labels refer to global car sides.
+    return [add(g, name+'_L', src, p, kind, mirror=(g == rear), note=note),
+            add(g, name+'_R', src, p, kind, mirror=(g != rear), note=note)]
+
+add(front, 'Front_chassis', 'Body012', kind='chassis')
+add(middle, 'Center_chassis', 'Body041', kind='chassis')
+add(rear, 'Rear_chassis', 'Body052', kind='chassis')
+
+# At the chassis ends the saved mounting-hole axes coincide exactly.
+# Middle front bolt centers: (+/-8.5,55,6.156922), rear: (+/-4.85,-115,5.29).
+# Front chassis hinge axes: X=+/-30, Z=6/50. Rear axes have the same X/Z.
+# Suspension is upright, symmetric, unsteered. Both axle heights are 28 mm.
+front_sphere_z = 36.46410161513776
+half_front_span = front_sphere_z - 15
+front_dz = 22 - half_front_span
+# Read the saved socket center rather than rounding its Z coordinate.
+front_socket = next(f.Surface.Center for f in geometry('Body013').Faces
+                    if type(f.Surface).__name__ == 'Sphere' and abs(f.Surface.Radius-4.2)<1e-6)
+front_socket_dz = -front_socket.z-6
+front_reach = math.sqrt(76**2 + front_socket_dz**2 - front_dz**2)
+front_x = -30 - front_reach
+rear_reach = math.sqrt(76**2 + 5.5**2 - 1**2)
+rear_x = -30 - rear_reach
+
+# Rotate the original A-arms about their inner hinge, keeping both ball/pin
+# centers on the upright knuckle. No source geometry is scaled.
+for g, prefix, upper_src, lower_src, socket_dz, outer_dz, y, x in [
+    (front, 'Front', 'Body013', 'Body015', front_socket_dz, front_dz, -32.5, front_x),
+    (rear, 'Rear', 'Body053', 'Body055', 5.5, -1.0, -35.0, rear_x),
+]:
+    arm_poses = {}
+    for label, src, hinge_z, desired_z in [
+        ('lower', lower_src, 6, outer_dz),
+        ('upper', upper_src, 50, -outer_dz),
+    ]:
+        # Front arm sockets open toward local -Z (opposite the rod sockets).
+        # Turn the lower arm over to receive the downward-facing lower stud,
+        # then solve its pitch about the unchanged chassis pin.
+        inverted = g == front and label == 'lower'
+        effective_dz = -socket_dz if inverted else socket_dz
+        angle = math.degrees(math.atan2(effective_dz,76) + math.asin(desired_z/math.hypot(76,socket_dz)))
+        r = rot((0,1,0), angle)
+        if inverted:
+            r = r.multiply(rot((1,0,0),180))
+        p = anchor((8,0,-6), (-30,y,hinge_z), r)
+        arm_poses[label] = p
+        pair(g, prefix+'_'+label+'_arm', src, p, 'arm')
+        # Source inner pin is 68 mm long; front and rear inner lug spans match.
+        pair(g, prefix+'_'+label+'_inner_pin', 'Body017', pose((-30,y+32,hinge_z-1.1)))
+    kp = pose((x-15,y+10.1,13))
+    pair(g,prefix+'_knuckle','Body008' if g==front else 'Body049',kp,'knuckle')
+    for offset in (7.2,22.8):
+        pair(g,prefix+'_hub_bearing_'+str(offset).replace('.','_'),'Body006',
+             pose((x-15+offset,y,28)))
+    if g==front:
+        pair(g,'Front_bearing_spacer','Body031',pose((x-15+12.2,y,28)))
+    else:
+        for label, z in [('lower',5),('upper',51)]:
+            pair(g,'Rear_'+label+'_outer_pin','Body057',pose((x,y+12,z-1.1)))
+    # Wheel is the source's simple 89 x 36 mm tire envelope, without a rim.
+    wheel_x = x-35
+    wheel_rotation = rot((0,0,1),-90)
+    pair(g,prefix+'_wheel','Body003',pose((wheel_x,y,28),wheel_rotation),'wheel',
+         'Original simplified wheel envelope; no tread or separate rim in source')
+    shaft_x = wheel_x+46
+    pair(g,prefix+'_wheel_spindle','Body025' if g==front else 'Body050',
+         pose((shaft_x,y,28),wheel_rotation))
+    if g==rear:
+        # Local cup axis is +Y. Face it inward along +X on the left side.
+        pair(g,'Rear_wheel_drive_cup','Body051',pose((shaft_x,y,28),wheel_rotation))
+    # Orient shock halves between actual upper/lower eye positions. Saved
+    # lower shock is also a housing; no unavailable spring/rod is invented.
+    # The rear ear spans local Y=-6.5..-1.5. Mount behind its aft face;
+    # +Y is aft in this rotated module. Keep the 3.7 mm half-width of
+    # the shock eye outside the ear, with 0.2 mm assembly clearance.
+    rear_eye_y = -1.5 + 3.7 + 0.2
+    top = V(-31.4,-26.75,65) if g==front else V(-30,rear_eye_y,65)
+    lp = arm_poses['lower']
+    # Front: the 14 mm gap between the two central bracket ears.
+    # Rear: the aft end of the lower-arm transverse mounting tube. The
+    # rear module's +Y points toward the back of the car after rotation.
+    lower_local = V(-32,0,-6.7) if g==front else V(-32,35,-7)
+    bottom = lp.multVec(lower_local)
+    direction = top-bottom
+    # Source mounting eye runs along X; rotate it to the mounting-pin Y axis
+    # before tilting the shock's long Z axis along the eye-to-eye vector.
+    z = direction.normalize()
+    pin = V(0,1,0)
+    x_axis = (pin-z*pin.dot(z)).normalize()
+    y_axis = z.cross(x_axis).normalize()
+    r = App.Rotation(x_axis,y_axis,z,'ZXY')
+    up = App.Placement(top-r.multVec(V(0,0,72)),r)
+    down_r = r.multiply(rot((1,0,0),180))
+    down = App.Placement(bottom-down_r.multVec(V(0,0,72)),down_r)
+    pair(g,prefix+'_shock_upper','Body016',up,'steel')
+    pair(g,prefix+'_shock_lower','Body019',down,'steel',
+         'Saved source lower shock is a second housing; telescoping overlap is illustrative')
+
+# The current bellcrank body already includes the left/right arms and bridge.
+add(middle,'Steering_bellcrank_pair','Body032',pose((-22.5,14.6,15.2)),'gear')
+# Align each support's vertical-wall holes to the corresponding servo ear.
+# Servo native holes: X=4.925/14.775, Y=-4.76/44.66, Z=28.3.
+# Support wall holes: Y=-4, Z=5.075/14.925, at the X=0 mating face.
+for i,servo_y in enumerate((-4.76,44.66)):
+    add(middle,'Servo_mount_'+str(i+1),'Body044',
+        pose((16.925-28.3, -40.82+servo_y+4, 4.925-5.075)),
+        'electronics', note='Wall fixing holes coaxial with servo ear holes; mating faces coincide')
+# Use exact right-angle placement instead of the old solver's tilted pose.
+add(middle,'Steering_servo','Body020',pose((16.925,-40.82,0),rot((0,1,0),-90)),'servo')
+horn_rotation = App.Rotation(V(0,-1,0), V(0,0,1), V(-1,0,0), 'ZXY')
+servo_horn = pose((-32.625,-131.77,14.85), horn_rotation)
+add(front,'Steering_servo_horn','Body022',servo_horn,'gear',note='Neutral visual placement on the modeled servo output')
+# Source ball-to-ball lengths are 83.78 and 30 mm; preserve those lengths.
+for suffix,sign in [('L',-1),('R',1)]:
+    outer=(sign*abs(front_x),-58.9,36.9641016151)
+    inner=(sign*22.5,-76.4,32.2)
+    add(front,'Steering_tie_rod_'+suffix,'Body023',
+        between((-41.89,0,6.55),(41.89,0,6.55),inner,outer,opening=(0,0,-1)),'steel',
+        note='Rigid source rod centered between neutral steering anchors; small end gaps are not a solved linkage')
+add(front,'Servo_to_bellcrank_link','Body038',
+    between((-15,0,6.55),(15,0,6.55),(-42.5,-106.4,23.2),(-38.625,-131.77,30.85),opening=(1,0,0)),'steel',
+    note='Socket mouths face inward along +X onto the lateral bellcrank/horn studs; source link length retained')
+
+# Electronics table matches all four middle-chassis mounting-hole centers.
+add(middle,'Electronics_table','Body059',pose((0,-115,0)),'electronics')
+# Align the support's transverse hinge to the table's saved camera hinge.
+esp_rot = IDENTITY
+esp_pose = anchor((1.5,12.5,-10.4),(0,-58.6,54.4),esp_rot)
+add(middle,'Camera_and_ESP32_support','Body058',esp_pose,'electronics',
+    note='Hinge aligned; board and camera electronics are not modeled in car.FCStd')
+# Existing rear subassembly supplies the motor and spur-gear coordinates.
+add(rear,'Motor_A2212','Body004',pose((-7,-74.96998799039,24.5),App.Rotation(0, math.sqrt(0.5), math.sqrt(0.5), 0)),'servo')
+add(rear,'Motor_pinion','Body048',pose((5,-74.96998799039,24.5),rot((0,1,0),-90)),'gear')
+add(rear,'Main_spur_gear','Body046',pose((-5,-37.5,23),rot((0,1,0),90)),'gear')
+for sign in (-1,1):
+    side='L' if sign>0 else 'R'
+    add(rear,'Drive_output_bearing_'+side,'Body006',pose((sign*19.5-2.5,-37.5,23)))
+# Each modeled half-shaft extends into the main gear and ends in a dogbone cup.
+pair(rear,'Gear_output_halfshaft','Body047',pose((-22,-37.5,23),rot((0,0,1),180)),'steel')
+# For the left side the mirrored half-shaft cup center is X=-42.5.
+# Wheel-cup open end points inward, toward the gear output.
+shaft_inner_x = rear_x-35+46
+gear_cup=(-42.5,-37.5,23)
+wheel_cup=(shaft_inner_x+16,-35,28)
+for sign,suffix in [(1,'L'),(-1,'R')]:
+    a=(sign*abs(gear_cup[0]),gear_cup[1],gear_cup[2])
+    b=(sign*abs(wheel_cup[0]),wheel_cup[1],wheel_cup[2])
+    add(rear,'Dogbone_'+suffix,'Body045',between((-19,0,0),(19,0,0),a,b),'steel',
+        note='Saved dogbone length retained; articulation and cup engagement are visual estimates')
+
+App.setActiveDocument(doc.Name)
+doc.recompute()
+for o in parts:
+    if not o.Shape.isValid():
+        raise RuntimeError('Invalid placed shape: '+o.Name)
+if App.GuiUp:
+    import FreeCADGui as Gui
+    from PySide6.QtWidgets import QApplication
+    from PySide6.QtTest import QTest
+    Gui.activeDocument().activeView().setCameraOrientation((0.4247082003,0.1759198966,0.3398511430,0.8204732386))
+    QTest.qWait(1200)  # Finish FreeCAD's animated view transition before saving.
+    Gui.activeDocument().activeView().fitAll()
+    Gui.activeDocument().activeView().redraw()
+doc.recompute()
+doc.saveAs(str(OUTPUT))
+if opened_source:
+    App.closeDocument(source.Name)
+print('Saved '+str(OUTPUT)+'; '+str(len(parts))+' fixed geometry instances.')

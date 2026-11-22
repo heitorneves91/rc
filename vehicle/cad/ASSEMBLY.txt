@@ -1,0 +1,93 @@
+RC CAR — STATIC VISUALIZATION ASSEMBLY
+
+Open full_assembly.FCStd directly in FreeCAD. It contains 74 embedded geometry
+instances, organized into front, middle and rear App::Part containers. Each
+component has an editable Placement and records its source body in Reference.
+No assembly workbench, joints, solver, Python features or external files are
+required to open it. car.FCStd and the two older assemblies are unchanged.
+
+Use this model as the packaging reference for the future fairing. The source
+parametric design remains car.FCStd; assembly parts are snapshots, not live
+links. Do not use the assembled car as a printable fused solid.
+
+COORDINATES AND DIMENSIONS (mm)
+X: across the car; +Y: forward; +Z: up.
+Origin: front chassis design datum, with its original Body placement removed.
+Middle module: translation (0,-121,5).
+Rear module: translation (0,-336,0), rotation 180 degrees about Z.
+Wheel centers: front Y=-32.5, rear Y=-301; all Z=28.
+Wheelbase: 268.5. Wheel envelopes: diameter 89, width 36.
+Front track: 282.401; rear track: 282.384 (wheel center to wheel center).
+Overall static bounds, including spindle ends and upright camera support:
+  X -161.200 to 161.200; Y -345.622 to 26.131; Z -16.500 to 102.400.
+Overall size: approximately 322.4 wide x 371.8 long x 118.9 high.
+Ground plane for the nominal tire envelopes: Z=-16.5.
+L/R instance suffixes identify negative/positive global X, respectively.
+
+WHAT IS INCLUDED
+Three chassis sections; upper/lower suspension arms and hinge pins; four
+knuckles, wheels, wheel spindles and hub bearing pairs; front bearing spacers;
+rear outer suspension pins; four two-piece shocks; steering bellcrank pair,
+tie rods, servo, servo mounts, horn and servo link; electronics table, upright
+ESP32/camera support; motor, pinion, main spur gear,
+output bearings, half-shafts, wheel drive cups and dogbones.
+
+Older belt-drive pulleys, the old straight rear axle, standalone generic servo
+horn and shaft collars are superseded hardware and are not installed alongside
+the current spur-gear drivetrain. Missing commercial electronics, battery,
+wiring, springs and general nuts/bolts are not represented by invented parts.
+The current SteeringBellcrank body already contains both sides and the bridge.
+Chassis locks are deliberately omitted from the assembly.
+
+PLACEMENT AND FIT LIMITS
+This is a static visualization pose, not a mechanically verified mechanism.
+Chassis mounting axes and equipment-table hole patterns were used for alignment.
+Suspension arms were rotated around their inner hinges to meet upright knuckle
+ball/pin centers, with level axle heights. Source part dimensions are retained.
+The front shock lower eyes attach at the middle of the lower arms, in the
+14 mm gap between bracket ears (source point -32,0,-6.7). Rear lower eyes
+attach at the aft end of the lower-arm mounting tube (source point -32,35,-7;
+the rear module is rotated 180 degrees). Front upper anchors are unchanged.
+Rear upper eyes attach behind the same chassis ears: the ears span local
+Y=-6.5..-1.5, and each eye center is at Y=2.4, allowing its 3.7 mm half-width
+plus 0.2 mm clearance behind the aft face. X/Z pin axes remain +/-30 and 65.
+Rear lower attachments are unchanged; shocks lean behind the upper wishbones.
+Both shocks have zero overlap with their upper wishbones, with minimum static
+clearance of 4.300 mm (upper housing) and 11.032 mm (lower housing).
+Front lower arms are turned over and repitched around their chassis pins:
+their socket mouths face up onto the lower knuckle studs. Upper arm mouths
+face down onto the upper studs. Saved sphere centers are retained.
+Tie-rod socket mouths face down onto their studs. The servo link mouths face
+inward along +X onto the lateral bellcrank/horn studs, with roll set explicitly.
+Servo-support wall holes coincide with all four servo-ear fixing holes and
+their mating faces touch. Relative to the first assembly, supports moved
++8.24 mm in Y, -1.8 mm in X and -0.15 mm in Z. These positions follow the servo
+fixings; the support feet and chassis-hole pattern have not been redesigned.
+The original wheels are simple cylindrical envelopes with through holes.
+Steering links and dogbones are rigid, centered between estimated endpoints;
+small endpoint gaps remain. Shocks use both saved housing shapes, with an
+illustrative telescoping overlap; the source contains no proper internal rod.
+The servo horn and camera-support hinge are packaging poses.
+Check these against the physical car before designing close-fitting fairing
+mounts. Allow for steering and suspension travel: the previews show only the
+neutral pose, not a swept clearance envelope.
+
+The saved SteeringBellcrank fillet has invalid edge tolerances. Only its
+assembly snapshot was repaired using Shape.fix(1e-5,1e-6,1e-3). It is valid after
+repair, with a volume change of about -0.0000012 mm^3. No source edit was made.
+
+REBUILDING
+Close full_assembly.FCStd, then run rebuild_assembly.FCMacro using FreeCAD's
+Macro dialog. Keep the macro beside car.FCStd, or set the RC_CAD_DIR environment
+variable to this directory. The macro writes full_assembly.FCStd. Rebuilding
+overwrites that generated assembly, including manual placement changes in it.
+The macro deliberately does not recompute or save the source document.
+
+VERIFICATION
+Reopened full_assembly.FCStd independently in FreeCAD 1.1.4: all 74 shapes valid,
+no error states, no external document dependencies, and an acyclic object graph.
+Checked wheel heights, symmetry, wheelbase and chassis interface mounting axes.
+Also checked all four corrected lower shock-eye centers, front knuckle/socket
+center coincidence, socket opening directions and all four servo mounting-hole
+centers/mating faces. Both chassis lock objects are absent.
+Rendered and inspected isometric, top, side and front views in assembly-preview/.
