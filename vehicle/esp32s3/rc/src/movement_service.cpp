@@ -7,6 +7,7 @@
 
 #include "configuration.h"
 #include "logs.h"
+#include "movement_mapping.h"
 
 namespace movement_service {
 namespace {
@@ -49,18 +50,6 @@ static_assert(kServoResolutionBits <= SOC_LEDC_TIMER_BIT_WIDE_NUM,
 static_assert(kThrottleChannel < SOC_LEDC_CHANNEL_NUM && kSteeringChannel < SOC_LEDC_CHANNEL_NUM,
               "servo LEDC channel out of range for this chip");
 
-//   throttle -> 1000 + 10 * throttle us   (0..100 => 1000..2000 us)
-//   steering -> 1500 + trim - 4.375 * steering us
-//               (-100..100 => 1937..1063 us, before trim)
-// Steering is 70% of the previous 6.25 us/unit mapping, and negated: the servo
-// linkage turns the wheels the opposite way to what the ground station means.
-// The scale is kept as a fraction (35/8) to stay in integer math.
-constexpr int kThrottleBaseUs = 1000;
-constexpr int kThrottleScaleUs = 10;
-constexpr int kSteeringCenterUs = 1500;
-constexpr int kSteeringScaleNum = 35;
-constexpr int kSteeringScaleDen = 8;
-constexpr int kSteeringDirection = -1;
 constexpr int kMaxSteeringTrimUs = 500;
 
 bool initialized = false;
@@ -116,16 +105,18 @@ void writePulseUs(int channel, int pulse_us, int min_us, int max_us) {
 }
 
 void applyThrottle(int throttle) {
-    writePulseUs(kThrottleChannel, kThrottleBaseUs + kThrottleScaleUs * throttle, kMinPulseUs,
+    throttle = constrain(throttle, -100, 100);
+    writePulseUs(kThrottleChannel, movement_mapping::throttlePulseUs(throttle), kMinPulseUs,
                  kMaxPulseUs);
     StateLock lock;
     current_throttle = throttle;
 }
 
 void applySteering(int steering) {
-    const int offset_us = kSteeringDirection * steering * kSteeringScaleNum / kSteeringScaleDen;
+    steering = constrain(steering, -100, 100);
     writePulseUs(kSteeringChannel,
-                 kSteeringCenterUs + config.movement.steering_trim_us + offset_us,
+                 movement_mapping::steeringPulseUs(steering, config.movement.steering_trim_us,
+                                                   config.movement.steering_limit_percent),
                  kSteeringMinPulseUs, kSteeringMaxPulseUs);
     StateLock lock;
     current_steering = steering;
@@ -223,6 +214,22 @@ void setSteeringTrimUs(int trim_us) {
     LOG_INFO(kTag, "steering trim set to %d us (saved to NVS)", trim_us);
 }
 
+void setSteeringLimitPercent(int percent) {
+    ensureMutex();
+    percent = constrain(percent, 1, 100);
+    int steering = 0;
+    {
+        StateLock lock;
+        config.movement.steering_limit_percent = percent;
+        steering = current_steering;
+    }
+    config.save();
+    if (initialized) {
+        applySteering(steering);
+    }
+    LOG_INFO(kTag, "steering limit set to %d%% (saved to NVS)", percent);
+}
+
 void getState(int& throttle, int& steering) {
     ensureMutex();
     StateLock lock;
@@ -246,7 +253,7 @@ bool init() {
         return false;
     }
 
-    LOG_INFO(kTag, "minimal signal before energizing the ESC (gpio %d throttle, %d steering)",
+    LOG_INFO(kTag, "neutral signal while arming the ESC (gpio %d throttle, %d steering)",
              config.movement.rl_motor_gpio, config.movement.steering_gpio);
     setThrottle(0, /*force=*/true);
     setSteering(0, /*force=*/true);

@@ -23,6 +23,7 @@ class VehicleService {
         const val MIN_STEERING_TRIM_US = -500
         const val MAX_STEERING_TRIM_US = 500
         const val DEFAULT_STEERING_TRIM_US = 20
+        const val DEFAULT_STEERING_LIMIT_PERCENT = 50
     }
 
     private val DEFAULT_HOST = "192.168.4.1"
@@ -73,6 +74,10 @@ class VehicleService {
     fun setSteeringTrim(trimUs: Int) {
         val clamped = trimUs.coerceIn(MIN_STEERING_TRIM_US, MAX_STEERING_TRIM_US)
         configure(Configuration.STEERING_TRIM, clamped.toString())
+    }
+
+    fun setSteeringLimit(percent: Int) {
+        configure(Configuration.STEERING_LIMIT, percent.coerceIn(1, 100).toString())
     }
 
     fun configure(configuration: Configuration, value: String? = null) {
@@ -144,7 +149,9 @@ class VehicleService {
                         throttle = Throttle(split[1].trim().toIntOrNull() ?: 0),
                         steering = Steering(split[2].trim().toIntOrNull() ?: 0),
                         steeringTrimUs = split.getOrNull(3)?.trim()?.toIntOrNull()
-                            ?: DEFAULT_STEERING_TRIM_US
+                            ?: DEFAULT_STEERING_TRIM_US,
+                        steeringLimitPercent = split.getOrNull(4)?.trim()?.toIntOrNull()
+                            ?.coerceIn(1, 100) ?: DEFAULT_STEERING_LIMIT_PERCENT
                     )
                 } catch (e: SocketException) {
                     break // socket closed
@@ -220,6 +227,7 @@ enum class Configuration {
     START_CAMERA,
     STOP_CAMERA,
     STEERING_TRIM,
+    STEERING_LIMIT,
 }
 
 data class ConfigureMessage(
@@ -239,11 +247,12 @@ data class TelemetryMessage(
     val throttle: Throttle,
     val steering: Steering,
     val steeringTrimUs: Int = VehicleService.DEFAULT_STEERING_TRIM_US,
+    val steeringLimitPercent: Int = VehicleService.DEFAULT_STEERING_LIMIT_PERCENT,
 ) {
     val type = MessageType.tele
 
     override fun toString(): String {
-        return "$type:$seq,${throttle.value},${steering.value},$steeringTrimUs"
+        return "$type:$seq,${throttle.value},${steering.value},$steeringTrimUs,$steeringLimitPercent"
     }
 }
 

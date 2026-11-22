@@ -7,7 +7,7 @@ This file provides guidance to AI coding agents when working with code in the `v
 The vehicle half of a remote-controlled car project:
 
 - **Controller & Vision**: **Seeed Studio XIAO ESP32-S3 Sense** (ESP32-S3 with 8 MB OPI PSRAM, 8 MB flash, on-board OV2640/OV5640 camera, and Wi-Fi).
-- **Powertrain & Actuators**: **A2212 1000KV** brushless outrunner drone motor driven by a hobby brushless ESC (throttle on **D0 / GPIO1**), plus a hobby steering servo (**D1 / GPIO2**).
+- **Powertrain & Actuators**: **A2212 1000KV** brushless outrunner drone motor driven by a ZMR Bidirectional ESC 50A (throttle on **D0 / GPIO1**), plus a hobby steering servo (**D1 / GPIO2**).
 - `esp32s3/rc/` — **the vehicle firmware.** PlatformIO/Arduino C++ targeting the XIAO ESP32-S3 Sense. Arms and drives the ESC and steering servo via LEDC PWM, hosts its own Wi-Fi soft AP (`rc-car` at `192.168.4.1`), speaks a custom UDP control/telemetry protocol with the ground station, and pushes chunked MJPEG camera video over UDP.
 - `board.diy` — **electronics board layout** (DIY Layout Creator / DIYLC). Perfboard (`48.26 × 63.5 mm`) carrying:
   - Three RC low-pass / signal-protection channels (`R1`, `R4`, `R5` = `1 kΩ` series resistors; `C8`, `C9`, `C10` = `4.7 nF` shunt ceramic capacitors to ground, $f_c \approx 34\text{ kHz}$) between 3-pin headers `PH8` and `PH7` to protect ESP32-S3 GPIOs and filter ESC switching noise.
@@ -27,7 +27,7 @@ pio run -t upload             # flash over USB
 pio device monitor            # serial console, 115200
 ```
 
-There is no test suite; `pio run` is the only check. `pio` lives at `~/.platformio/penv/bin/pio` if it is not on `PATH`.
+Build with `pio run`. Pure actuator mappings also have a host check: from `esp32s3/rc/`, run `g++ -std=c++11 -Iinclude test/host/movement_mapping_test.cpp -o /tmp/rc-movement-test && /tmp/rc-movement-test`. `pio` lives at `~/.platformio/penv/bin/pio` if it is not on `PATH`.
 
 `platformio.ini` pins board-specific PSRAM/flash settings (`qio_opi`, 8 MB, `-DBOARD_HAS_PSRAM`) that the XIAO ESP32-S3 Sense camera needs — changing them breaks framebuffer allocation.
 
@@ -50,10 +50,11 @@ Each service is a namespace with a header in `include/` and its implementation i
 **`configuration`** — a single global `config` aggregating nested structs (`movement`, `camera`, `ground_station`, `wifi`) plus `log_level`. Persists to NVS (`Preferences`, namespace `"rc"`): `config.load()` falls back to the compiled-in defaults for any key absent from flash, so the layout can grow without bricking already-flashed devices. `config.save()` persists.
 
 **`movement_service`** — throttle/steering ints map to servo pulse widths:
-- **ESC / A2212 1000KV motor (`rl_motor_gpio = 1`)**: `1000 + 10 * throttle` µs (`0..100` → `1000..2000 µs`), clamped to `1000–2000 µs`. Holds `1000 µs` for `config.movement.arm_delay_s` (`2.0 s`) on `init()` so the brushless ESC arms cleanly before drive commands are accepted.
-- **Steering servo (`steering_gpio = 2`)**: `1500 + steering_trim_us - 4.375 * steering` µs (default `steering_trim_us = 20` µs; negated because the mechanical linkage is reversed, and 70% of the earlier `6.25 µs/unit` mapping), clamped to `800–2200 µs`.
+- **ESC / A2212 1000KV motor (`rl_motor_gpio = 1`)**: `1500 + 5 * throttle` µs (`-100..100` → `1000..2000 µs`, 0 = neutral), clamped to `1000–2000 µs`. Holds `1500 µs` for `config.movement.arm_delay_s` (`2.0 s`) on `init()` so the brushless ESC arms cleanly before drive commands are accepted.
+- **Steering servo (`steering_gpio = 2`)**: `1500 + steering_trim_us - 4.375 * steering * steering_limit_percent / 100` µs (default `steering_trim_us = 20` µs; negated because the mechanical linkage is reversed, and 70% of the earlier `6.25 µs/unit` mapping before the travel limit; default travel limit is 50%), clamped to `800–2200 µs`.
+- In Android, drag the throttle up for forward or down for reverse; releasing returns to neutral. The speed cap applies in both directions. Tap **STEERING** to set maximum travel, then **Save & Close**. This limit scales the steering excursion around the trimmed center; 100% restores the previous travel. Update both firmware and app together. The ESC mapping assumes 1000/1500/2000 µs reverse/neutral/forward; verify neutral and direction with the wheels lifted before driving.
 - Signals are emitted by LEDC at 50 Hz, 14-bit duty resolution (the ESP32-S3's ceiling `SOC_LEDC_TIMER_BIT_WIDE_NUM` — requesting 16 bits makes `ledcSetup` fail).
-- Owns the **failsafe**: a watchdog task (`priority = 5`) cuts throttle to `0` (`1000 µs`) if no command arrives within `config.movement.command_timeout_s` (`1.0 s`). This deliberately lives here, not in the link layer, so *any* caller that stops feeding commands stops the vehicle. Note the asymmetry: `setThrottle`/`setSteering` feed the watchdog, whereas `applyThrottle`/`applySteering` do not — the failsafe path uses `applyThrottle(0)` so it stays latched until a real command arrives.
+- Owns the **failsafe**: a watchdog task (`priority = 5`) cuts throttle to `0` (`1500 µs`) if no command arrives within `config.movement.command_timeout_s` (`1.0 s`). This deliberately lives here, not in the link layer, so *any* caller that stops feeding commands stops the vehicle. Note the asymmetry: `setThrottle`/`setSteering` feed the watchdog, whereas `applyThrottle`/`applySteering` do not — the failsafe path uses `applyThrottle(0)` so it stays latched until a real command arrives.
 
 **`ground_station_service`** — one `WiFiUDP` socket polled from a receive task (`priority = 6`), plus a telemetry task (`priority = 4`, 4 Hz). The telemetry destination is learned from whatever address sent the last packet. Move commands carry a monotonic `seq`; anything `<=` the last seen seq is dropped as stale/reordered, and `GROUND_HELLO` resets that counter because the client restarts its own sequence at −1 when it reopens its socket.
 
@@ -73,9 +74,9 @@ LEDC timer 0 / channel 0 belong to the camera's 20 MHz `XCLK`, so movement uses 
 
 | Message | Direction | Payload |
 | --- | --- | --- |
-| `move:<seq>,<throttle>,<steering>` | ground → vehicle | drive command (`throttle` `0..100`, `steering` `-100..100`), ~25 Hz |
-| `conf:<seq>,<configuration>,<value>` | ground → vehicle | `GROUND_HELLO`, `START_CAMERA` (optional `width,height,framerate`), `STOP_CAMERA`, `STEERING_TRIM` (`trim_us` in `-500..500`, applied immediately and saved to NVS) |
-| `tele:<seq>,<throttle>,<steering>,<steering_trim_us>` | vehicle → ground | telemetry, 4 Hz (plus immediate push on `GROUND_HELLO` and `STEERING_TRIM`) |
+| `move:<seq>,<throttle>,<steering>` | ground → vehicle | drive command (`throttle` `-100..100` (0 = neutral), `steering` `-100..100`), ~25 Hz |
+| `conf:<seq>,<configuration>,<value>` | ground → vehicle | `GROUND_HELLO`, `START_CAMERA` (optional `width,height,framerate`), `STOP_CAMERA`, `STEERING_TRIM` (`trim_us` in `-500..500`, applied immediately and saved to NVS), `STEERING_LIMIT` (`1..100` percent of previous travel, default `50`, applied immediately and saved to NVS) |
+| `tele:<seq>,<throttle>,<steering>,<steering_trim_us>,<steering_limit_percent>` | vehicle → ground | telemetry, 4 Hz (plus immediate push on `GROUND_HELLO`, `STEERING_TRIM`, and `STEERING_LIMIT`) |
 
 Video is the one message that is binary — see below.
 

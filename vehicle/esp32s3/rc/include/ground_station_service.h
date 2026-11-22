@@ -12,7 +12,7 @@
 //
 //     move:<seq>,<throttle>,<steering>                  ground -> vehicle, drive command
 //     conf:<seq>,<configuration>,<value>                ground -> vehicle, e.g. GROUND_HELLO
-//     tele:<seq>,<throttle>,<steering>,<steering_trim>  vehicle -> ground, telemetry
+//     tele:<seq>,<throttle>,<steering>,<steering_trim>,<steering_limit_percent>  vehicle -> ground, telemetry
 #pragma once
 
 #include <Arduino.h>
@@ -27,6 +27,7 @@ enum class ConfigurationCommand {
     StartCamera,
     StopCamera,
     SteeringTrim,
+    SteeringLimit,
     Unknown
 };
 
@@ -66,6 +67,7 @@ class GroundStationService {
     void handleConf(const ConfigureMessage& msg, IPAddress addr);
     void handleStartCamera(const ConfigureMessage& msg, IPAddress addr);
     void handleSteeringTrim(const ConfigureMessage& msg);
+    void handleSteeringLimit(const ConfigureMessage& msg);
     void telemetryLoop();
     void startTelemetry();
 

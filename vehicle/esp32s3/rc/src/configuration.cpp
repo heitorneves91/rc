@@ -33,6 +33,8 @@ void Configuration::load() {
     movement.arm_delay_s = prefs.getFloat("mv_arm_delay", movement.arm_delay_s);
     movement.command_timeout_s = prefs.getFloat("mv_cmd_tmout", movement.command_timeout_s);
     movement.steering_trim_us = prefs.getInt("mv_steer_trim", movement.steering_trim_us);
+    movement.steering_limit_percent = constrain(
+        prefs.getInt("mv_steer_limit", movement.steering_limit_percent), 1, 100);
 
     camera.width = prefs.getInt("cam_width", camera.width);
     camera.height = prefs.getInt("cam_height", camera.height);
@@ -69,6 +71,7 @@ void Configuration::save() {
     prefs.putFloat("mv_arm_delay", movement.arm_delay_s);
     prefs.putFloat("mv_cmd_tmout", movement.command_timeout_s);
     prefs.putInt("mv_steer_trim", movement.steering_trim_us);
+    prefs.putInt("mv_steer_limit", movement.steering_limit_percent);
 
     prefs.putInt("cam_width", camera.width);
     prefs.putInt("cam_height", camera.height);

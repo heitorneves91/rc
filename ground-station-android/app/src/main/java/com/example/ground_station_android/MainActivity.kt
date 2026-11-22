@@ -157,6 +157,9 @@ class MainActivity : ComponentActivity() {
             if (showSteeringTrimDialog) {
                 SteeringTrimDialog(
                     currentTrimUs = steeringTrimUs,
+                    currentLimitPercent = telemetry?.steeringLimitPercent
+                        ?: VehicleService.DEFAULT_STEERING_LIMIT_PERCENT,
+                    onApplyLimit = vehicleService::setSteeringLimit,
                     onApplyTrim = updateSteeringTrim,
                     onDismiss = { showSteeringTrimDialog = false }
                 )
@@ -382,14 +385,18 @@ class MainActivity : ComponentActivity() {
                                             horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
                                             Text(
-                                                "STEER TRIM",
+                                                "STEERING",
                                                 fontSize = 8.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White.copy(alpha = 0.6f),
                                                 letterSpacing = 0.5.sp
                                             )
                                             Text(
-                                                String.format(Locale.US, "%+d µs", steeringTrimUs),
+                                                String.format(
+                                                    Locale.US, "%+d µs · %d%%", steeringTrimUs,
+                                                    telemetry?.steeringLimitPercent
+                                                        ?: VehicleService.DEFAULT_STEERING_LIMIT_PERCENT
+                                                ),
                                                 fontSize = 12.sp,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White
@@ -524,10 +531,10 @@ fun computeJoystickValues(
     val yScale = BOTTOM_TO_TOP_POWER / areaHeight
 
     val dxScaled = (dx * xScale).coerceIn(-100f, 100f).roundToInt()
-    val normalizedY = (dy * yScale).coerceIn(0f, 100f)
+    val normalizedY = (dy * yScale).coerceIn(-100f, 100f)
     val dyScaled = ((normalizedY * clampedMaxY) / 100f)
         .roundToInt()
-        .coerceIn(0, clampedMaxY)
+        .coerceIn(-clampedMaxY, clampedMaxY)
 
     return dxScaled to dyScaled
 }
@@ -622,7 +629,7 @@ fun CameraSettingsDialog(
                     )
                 } else {
                     Text(
-                        "Limits the maximum throttle percentage when dragging acceleration up and down.",
+                        "Limits forward and reverse throttle. Drag up for forward, down for reverse; release to stop.",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -699,19 +706,36 @@ fun CameraSettingsDialog(
 @Composable
 fun SteeringTrimDialog(
     currentTrimUs: Int,
+    currentLimitPercent: Int,
+    onApplyLimit: (Int) -> Unit,
     onApplyTrim: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
     var trimInput by remember(currentTrimUs) { mutableStateOf(currentTrimUs.toString()) }
+    var limitPercent by remember { mutableStateOf(currentLimitPercent) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Steering Trim (Offset)") },
+        title = { Text("Steering Settings") },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
+                Text("Maximum steering: $limitPercent%", fontWeight = FontWeight.Bold)
+                Text(
+                    "Limits travel in both directions. Start at 50% and adjust after a slow test drive. Saved on the vehicle with Save & Close.",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Slider(
+                    value = limitPercent.toFloat(),
+                    onValueChange = { limitPercent = it.roundToInt() },
+                    valueRange = 1f..100f,
+                    steps = 98,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text("Center trim", fontWeight = FontWeight.Bold)
                 Text(
                     "Adjusts the steering servo center offset in microseconds (µs) and saves it to the vehicle's NVS flash memory.",
                     fontSize = 12.sp,
@@ -799,6 +823,7 @@ fun SteeringTrimDialog(
                     trimInput.trim().toIntOrNull()?.let { parsed ->
                         onApplyTrim(parsed)
                     }
+                    onApplyLimit(limitPercent)
                     onDismiss()
                 }
             ) {

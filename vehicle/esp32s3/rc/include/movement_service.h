@@ -3,7 +3,7 @@
 // Also owns the command-timeout failsafe. A background watchdog task watches
 // the time since the last drive command; if more than
 // `config.movement.command_timeout_s` elapses, it cuts the throttle to the
-// minimum (safe) signal. This keeps the failsafe a movement concern,
+// neutral (1500 us) signal. This keeps the failsafe a movement concern,
 // independent of which link delivered the commands - any caller that stops
 // feeding commands will cause the vehicle to stop, with no cooperation
 // required from the link.
@@ -16,7 +16,7 @@
 
 namespace movement_service {
 
-// Arms the ESC (holds the minimum signal for `arm_delay_s`) and starts the
+// Arms the ESC (holds the neutral signal for `arm_delay_s`) and starts the
 // watchdog. Returns false if the LEDC channels could not be set up.
 bool init();
 
@@ -25,6 +25,7 @@ void shutdown();
 
 // `force` writes the actuators even before init() has completed - used
 // during arming, and for manual bring-up.
+// Signed throttle: -100 full reverse, 0 neutral, +100 full forward.
 void setThrottle(int throttle, bool force = false);
 void setSteering(int steering, bool force = false);
 
@@ -32,6 +33,9 @@ void setSteering(int steering, bool force = false);
 // immediately re-applies the current steering angle so the servo horn moves
 // to the new center without waiting for the next drive command.
 void setSteeringTrimUs(int trim_us);
+
+// Sets travel to 1..100% of the previous range, persists and applies immediately.
+void setSteeringLimitPercent(int percent);
 
 // Current (throttle, steering) as last written to the actuators.
 void getState(int& throttle, int& steering);

@@ -18,6 +18,7 @@ ConfigurationCommand parseConfiguration(const char* name) {
     if (strcmp(name, "START_CAMERA") == 0) return ConfigurationCommand::StartCamera;
     if (strcmp(name, "STOP_CAMERA") == 0) return ConfigurationCommand::StopCamera;
     if (strcmp(name, "STEERING_TRIM") == 0) return ConfigurationCommand::SteeringTrim;
+    if (strcmp(name, "STEERING_LIMIT") == 0) return ConfigurationCommand::SteeringLimit;
     return ConfigurationCommand::Unknown;
 }
 
@@ -181,6 +182,9 @@ void GroundStationService::handleConf(const ConfigureMessage& msg, IPAddress add
         case ConfigurationCommand::SteeringTrim:
             handleSteeringTrim(msg);
             break;
+        case ConfigurationCommand::SteeringLimit:
+            handleSteeringLimit(msg);
+            break;
         case ConfigurationCommand::Unknown:
             LOG_WARN(kTag, "unknown configuration command");
             break;
@@ -213,6 +217,19 @@ void GroundStationService::handleSteeringTrim(const ConfigureMessage& msg) {
     }
 
     movement_service::setSteeringTrimUs(trim_us);
+    if (telemetry_task_ != nullptr) {
+        xTaskNotifyGive(telemetry_task_);
+    }
+}
+
+void GroundStationService::handleSteeringLimit(const ConfigureMessage& msg) {
+    char* end = nullptr;
+    const long percent = strtol(msg.value.c_str(), &end, 10);
+    if (end == msg.value.c_str() || *end != '\0' || percent < 1 || percent > 100) {
+        LOG_WARN(kTag, "bad steering limit '%s', ignoring", msg.value.c_str());
+        return;
+    }
+    movement_service::setSteeringLimitPercent(static_cast<int>(percent));
     if (telemetry_task_ != nullptr) {
         xTaskNotifyGive(telemetry_task_);
     }
@@ -256,8 +273,9 @@ void GroundStationService::sendTelemetry(int throttle, int steering) {
     telemetry_seq_++;
 
     char msg[64];
-    const int len = snprintf(msg, sizeof(msg), "tele:%ld,%d,%d,%d", telemetry_seq_, throttle,
-                             steering, config.movement.steering_trim_us);
+    const int len = snprintf(msg, sizeof(msg), "tele:%ld,%d,%d,%d,%d", telemetry_seq_, throttle,
+                             steering, config.movement.steering_trim_us,
+                             config.movement.steering_limit_percent);
 
     socket_.beginPacket(ground_station_addr_, ground_station_port_);
     socket_.write(reinterpret_cast<const uint8_t*>(msg), len);

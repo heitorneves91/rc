@@ -28,7 +28,7 @@ class ExampleUnitTest {
             steering = Steering(-20),
             steeringTrimUs = 35
         )
-        assertEquals("tele:7,30,-20,35", msg.toString())
+        assertEquals("tele:7,30,-20,35,50", msg.toString())
     }
 
     @Test
@@ -82,4 +82,22 @@ class ExampleUnitTest {
         )
         assertEquals(-100, leftSteer)
     }
+    @Test
+    fun computeJoystickValues_reverseUsesSameSpeedLimitAndStopsAtCenter() {
+        assertEquals(0 to -15, computeJoystickValues(0f, -250f, 1000f, 30))
+        assertEquals(0 to -30, computeJoystickValues(0f, -800f, 1000f, 30))
+        assertEquals(0 to 0, computeJoystickValues(0f, 0f, 1000f, 30))
+        assertEquals(0 to 0, computeJoystickValues(0f, -800f, 0f, 30))
+    }
+
+    @Test
+    fun steeringLimitCommandAndReverseTelemetry_preserveWireValues() {
+        assertEquals("conf:42,STEERING_LIMIT,25", ConfigureMessage(
+            42L, Configuration.STEERING_LIMIT, "25"
+        ).toString())
+        assertEquals("tele:8,-30,100,20,25", TelemetryMessage(
+            8L, Throttle(-30), Steering(100), 20, 25
+        ).toString())
+    }
+
 }

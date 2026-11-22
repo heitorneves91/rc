@@ -20,7 +20,7 @@ struct MovementConfig {
     int rl_motor_gpio = 1;   // D0 - ESC signal
     int steering_gpio = 2;   // D1 - steering servo signal
 
-    // Seconds to hold the minimum signal so the ESC can arm on startup.
+    // Seconds to hold the neutral signal so the ESC can arm on startup.
     float arm_delay_s = 2.0f;
 
     // Failsafe: if no drive command arrives within this window (seconds), the
@@ -34,6 +34,9 @@ struct MovementConfig {
     // allowing a perfect mechanical fit. Positive = counter-clockwise when
     // facing the horn (on most hobby servos a longer pulse turns CCW).
     int steering_trim_us = 20;
+
+    // Percent of the previous steering travel, adjustable from the ground station.
+    int steering_limit_percent = 50;
 };
 
 struct CameraConfig {
