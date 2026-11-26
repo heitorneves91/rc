@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "baseline_revision": 2,
+  "current_revision": 3,
+  "comparison": "Remaining complete fairing kits; printed wing/bumper excluded from both. Same resolved printer, filament and conservative process; critical-only OFF, fixed 0.20 mm, 2 walls / 5% infill.",
+  "resolved_profile_sha256": {
+    "machine": "382a4eb5135f07dc459d9b0e8b9485e54978ff3a974d2ae1463615cda91517cc",
+    "process": "77d09bd2c8013b564f8f1ccd1e6da381e7aad17b7120d72f0188dcab16f26cbc",
+    "filament": "a2e284e5f045dd6af006889d6e7f8c3af7f60c29e296387a2dda1b5ceb6d01b4"
+  },
+  "baseline": {
+    "parts": 33,
+    "plates": 4,
+    "estimated_model_g": 163.474,
+    "estimated_brim_g": 5.028,
+    "estimated_support_g": 96.691,
+    "estimated_total_g": 265.192,
+    "estimated_total_hours": 14.343
+  },
+  "current": {
+    "parts": 47,
+    "plates": 5,
+    "estimated_model_g": 165.194,
+    "estimated_brim_g": 7.902,
+    "estimated_support_g": 50.483,
+    "estimated_total_g": 223.579,
+    "estimated_total_hours": 13.985
+  },
+  "support_saved_g": 46.208,
+  "support_reduction_percent": 47.79,
+  "total_saved_g": 41.613,
+  "total_reduction_percent": 15.69,
+  "notes": [
+    "Slicer estimates, not physical print validation.",
+    "The extra seams/parts and plate layouts are part of the manufacturing redesign.",
+    "Do not substitute the old critical-only totals for this matched baseline."
+  ],
+  "nose_support_comparison": {
+    "L": {
+      "baseline_support_g": 18.929,
+      "current_support_g": 3.174,
+      "reduction_percent": 83.23
+    },
+    "R": {
+      "baseline_support_g": 18.649,
+      "current_support_g": 3.212,
+      "reduction_percent": 82.77
+    }
+  }
+}

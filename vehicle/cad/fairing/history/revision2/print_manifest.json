@@ -1,0 +1,1297 @@
+[
+  {
+    "name": "Roof_cap",
+    "orientation": [
+      180,
+      0,
+      0
+    ],
+    "note": "Exterior roof flat against the build plate; four M3 screws into separate nuts below tabs.",
+    "support": "No broad internal roof support; small support at the intake/vent rim only if needed",
+    "assembly_bounds_mm": [
+      -70.4340687238691,
+      -223.9539413638752,
+      105.14999989999977,
+      70.43406872573657,
+      -136.03279136861406,
+      118.00001127505418
+    ],
+    "print_size_mm": [
+      140.868,
+      87.921,
+      12.85
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        1.0,
+        0.0,
+        0.0,
+        6.123233995736766e-17
+      ],
+      "translation_mm": [
+        80.4340687238691,
+        -126.03279136861406,
+        118.0000112750542
+      ]
+    },
+    "mesh_facets": 16046
+  },
+  {
+    "name": "Nose_L",
+    "orientation": [
+      -90,
+      0,
+      0
+    ],
+    "note": "Transverse seam face on bed; glue shell sections using the separate inner splice strips.",
+    "support": "Paint-on support only below isolated fender lips and window corners; avoid filling the open cabin",
+    "assembly_bounds_mm": [
+      -131.36470659134406,
+      -89.85000009999999,
+      8.01867941947645,
+      -0.14999990000000213,
+      45.000000100000015,
+      88.57581196151521
+    ],
+    "print_size_mm": [
+      131.215,
+      80.557,
+      134.85
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        141.36470659134406,
+        1.9813205805235299,
+        45.00000010000003
+      ]
+    },
+    "mesh_facets": 40252
+  },
+  {
+    "name": "Nose_R",
+    "orientation": [
+      -90,
+      0,
+      0
+    ],
+    "note": "Transverse seam face on bed; glue shell sections using the separate inner splice strips.",
+    "support": "Paint-on support only below isolated fender lips and window corners; avoid filling the open cabin",
+    "assembly_bounds_mm": [
+      0.14999989999999414,
+      -89.85000010000003,
+      8.018679419245675,
+      131.3647065913441,
+      45.00000010000077,
+      88.57581196151521
+    ],
+    "print_size_mm": [
+      131.215,
+      80.557,
+      134.85
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        9.850000100000006,
+        1.9813205807543053,
+        45.000000100000776
+      ]
+    },
+    "mesh_facets": 40220
+  },
+  {
+    "name": "Cab_L",
+    "orientation": [
+      -90,
+      0,
+      0
+    ],
+    "note": "Transverse seam face on bed; glue shell sections using the separate inner splice strips.",
+    "support": "Paint-on support only below isolated fender lips and window corners; avoid filling the open cabin",
+    "assembly_bounds_mm": [
+      -109.48679231676469,
+      -245.85000010099998,
+      5.591821443309608,
+      -0.149999899999999,
+      -90.14999989899991,
+      104.85000010000006
+    ],
+    "print_size_mm": [
+      109.337,
+      99.258,
+      155.7
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        119.48679231676469,
+        4.408178556690338,
+        -90.14999989900001
+      ]
+    },
+    "mesh_facets": 17404
+  },
+  {
+    "name": "Cab_R",
+    "orientation": [
+      -90,
+      0,
+      0
+    ],
+    "note": "Transverse seam face on bed; glue shell sections using the separate inner splice strips.",
+    "support": "Paint-on support only below isolated fender lips and window corners; avoid filling the open cabin",
+    "assembly_bounds_mm": [
+      0.14999989999997726,
+      -245.85000010099998,
+      5.591821438851238,
+      109.48679231375269,
+      -90.14999989899991,
+      104.85000010000006
+    ],
+    "print_size_mm": [
+      109.337,
+      99.258,
+      155.7
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865476,
+        0.0,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        9.850000100000022,
+        4.408178561148707,
+        -90.1499998989999
+      ]
+    },
+    "mesh_facets": 17368
+  },
+  {
+    "name": "Tail_L",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "Transverse seam face on bed; glue shell sections using the separate inner splice strips.",
+    "support": "Paint-on support only below isolated fender lips and window corners; avoid filling the open cabin",
+    "assembly_bounds_mm": [
+      -131.36447345314787,
+      -350.0000001,
+      4.999999899999998,
+      -0.1499998999999968,
+      -246.1499998999994,
+      87.21543549899314
+    ],
+    "print_size_mm": [
+      131.214,
+      82.215,
+      103.85
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        141.36447345314787,
+        97.2154354989932,
+        350.0000001
+      ]
+    },
+    "mesh_facets": 25230
+  },
+  {
+    "name": "Tail_R",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "Transverse seam face on bed; glue shell sections using the separate inner splice strips.",
+    "support": "Paint-on support only below isolated fender lips and window corners; avoid filling the open cabin",
+    "assembly_bounds_mm": [
+      0.1499998999999968,
+      -350.0000001,
+      4.999999899999998,
+      131.36447345314784,
+      -246.1499998999994,
+      87.21543549899314
+    ],
+    "print_size_mm": [
+      131.214,
+      82.215,
+      103.85
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        9.850000100000003,
+        97.2154354989932,
+        350.0000001
+      ]
+    },
+    "mesh_facets": 25176
+  },
+  {
+    "name": "Splice_Front_L1",
+    "orientation": [
+      0,
+      -90,
+      0
+    ],
+    "note": "Conformal inner seam backing; 0.4 mm glue allowance per shell face. Mark seam center before gluing.",
+    "support": "Small local supports if needed; print with broad curved face down",
+    "assembly_bounds_mm": [
+      -96.0000001,
+      -98.0000001,
+      15.999999899999967,
+      -91.5258421809832,
+      -85.18815628683836,
+      44.06517124655999
+    ],
+    "print_size_mm": [
+      28.065,
+      12.812,
+      4.474
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865476,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        54.06517124655997,
+        108.0000001,
+        96.00000010000001
+      ]
+    },
+    "mesh_facets": 80
+  },
+  {
+    "name": "Splice_Front_R1",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "Conformal inner seam backing; 0.4 mm glue allowance per shell face. Mark seam center before gluing.",
+    "support": "Small local supports if needed; print with broad curved face down",
+    "assembly_bounds_mm": [
+      91.5258421809832,
+      -98.00000010000001,
+      15.9999999,
+      96.0000001,
+      -85.18815628683834,
+      44.065171246559984
+    ],
+    "print_size_mm": [
+      28.065,
+      12.812,
+      4.474
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -5.999999900000022,
+        108.00000010000001,
+        96.0000001
+      ]
+    },
+    "mesh_facets": 74
+  },
+  {
+    "name": "Splice_Rear_L1",
+    "orientation": [
+      0,
+      -90,
+      0
+    ],
+    "note": "Conformal inner seam backing; 0.4 mm glue allowance per shell face. Mark seam center before gluing.",
+    "support": "Small local supports if needed; print with broad curved face down",
+    "assembly_bounds_mm": [
+      -96.00000010000002,
+      -254.00000010000002,
+      15.9999999,
+      -85.74720615697404,
+      -237.99999989999995,
+      76.00000010000002
+    ],
+    "print_size_mm": [
+      60.0,
+      16.0,
+      10.253
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865476,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        86.00000010000001,
+        264.0000001,
+        96.00000010000004
+      ]
+    },
+    "mesh_facets": 1132
+  },
+  {
+    "name": "Splice_Rear_R1",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "Conformal inner seam backing; 0.4 mm glue allowance per shell face. Mark seam center before gluing.",
+    "support": "Small local supports if needed; print with broad curved face down",
+    "assembly_bounds_mm": [
+      85.7472061796485,
+      -254.0000001,
+      15.9999999,
+      96.00000010000002,
+      -237.9999998999999,
+      76.0000001
+    ],
+    "print_size_mm": [
+      60.0,
+      16.0,
+      10.253
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -5.999999900000018,
+        264.00000009999997,
+        96.00000010000001
+      ]
+    },
+    "mesh_facets": 1128
+  },
+  {
+    "name": "Splice_center_Nose",
+    "orientation": [
+      180,
+      0,
+      0
+    ],
+    "note": "Glue beneath centerline; do not cover louvers.",
+    "support": "None or very small edge support",
+    "assembly_bounds_mm": [
+      -9.000000100000003,
+      -10.0000001,
+      67.76780553964551,
+      9.0000001,
+      14.000000100000014,
+      77.69332715604239
+    ],
+    "print_size_mm": [
+      18.0,
+      24.0,
+      9.926
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        1.0,
+        0.0,
+        0.0,
+        6.123233995736766e-17
+      ],
+      "translation_mm": [
+        19.0000001,
+        24.000000100000022,
+        77.69332715604239
+      ]
+    },
+    "mesh_facets": 212
+  },
+  {
+    "name": "Splice_center_Tail",
+    "orientation": [
+      180,
+      0,
+      0
+    ],
+    "note": "Glue beneath centerline; do not cover louvers.",
+    "support": "None or very small edge support",
+    "assembly_bounds_mm": [
+      -9.000000100000003,
+      -337.0000001,
+      75.21833582110924,
+      9.0000001,
+      -310.9999999,
+      78.42885457819327
+    ],
+    "print_size_mm": [
+      18.0,
+      26.0,
+      3.211
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        1.0,
+        0.0,
+        0.0,
+        6.123233995736766e-17
+      ],
+      "translation_mm": [
+        19.0000001,
+        -300.9999999,
+        78.42885457819331
+      ]
+    },
+    "mesh_facets": 160
+  },
+  {
+    "name": "Mount_1_R",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "M3 through existing chassis corner hole; M3 screw through shell pad and bracket into a loose nut below the foot. Longer lower screws share electronics-table fixing.",
+    "support": "Only small horizontal screw-hole bridges; print the L profile on its side",
+    "assembly_bounds_mm": [
+      60.4,
+      -186.6,
+      -3.0,
+      81.5,
+      -172.6,
+      11.0
+    ],
+    "print_size_mm": [
+      14.0,
+      14.0,
+      21.1
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        12.999999999999986,
+        196.6,
+        81.5
+      ]
+    },
+    "mesh_facets": 884
+  },
+  {
+    "name": "Mount_1_L",
+    "orientation": [
+      0,
+      -90,
+      0
+    ],
+    "note": "M3 through existing chassis corner hole; M3 screw through shell pad and bracket into a loose nut below the foot. Longer lower screws share electronics-table fixing.",
+    "support": "Only small horizontal screw-hole bridges; print the L profile on its side",
+    "assembly_bounds_mm": [
+      -81.5,
+      -186.6,
+      -3.0,
+      -60.4,
+      -172.6,
+      11.0
+    ],
+    "print_size_mm": [
+      14.0,
+      14.0,
+      21.1
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865476,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        20.999999999999986,
+        196.6,
+        81.5
+      ]
+    },
+    "mesh_facets": 884
+  },
+  {
+    "name": "Mount_2_R",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "M3 through existing chassis corner hole; M3 screw through shell pad and bracket into a loose nut below the foot. Longer lower screws share electronics-table fixing.",
+    "support": "Only small horizontal screw-hole bridges; print the L profile on its side",
+    "assembly_bounds_mm": [
+      60.4,
+      -239.4,
+      -3.0,
+      81.5,
+      -225.4,
+      11.0
+    ],
+    "print_size_mm": [
+      14.0,
+      14.0,
+      21.1
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        12.999999999999986,
+        249.4,
+        81.5
+      ]
+    },
+    "mesh_facets": 884
+  },
+  {
+    "name": "Mount_2_L",
+    "orientation": [
+      0,
+      -90,
+      0
+    ],
+    "note": "M3 through existing chassis corner hole; M3 screw through shell pad and bracket into a loose nut below the foot. Longer lower screws share electronics-table fixing.",
+    "support": "Only small horizontal screw-hole bridges; print the L profile on its side",
+    "assembly_bounds_mm": [
+      -81.5,
+      -239.4,
+      -3.0,
+      -60.4,
+      -225.4,
+      11.0
+    ],
+    "print_size_mm": [
+      14.0,
+      14.0,
+      21.1
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865476,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        20.999999999999986,
+        249.4,
+        81.5
+      ]
+    },
+    "mesh_facets": 884
+  },
+  {
+    "name": "Roof_spacer_1_L",
+    "orientation": [
+      0,
+      0,
+      0
+    ],
+    "note": "Bottom sits on cab tab; contoured top supports roof. Keep numbered front/rear pairs distinct.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -58.6000001,
+      -151.6000001,
+      104.9999999,
+      -51.39999989999998,
+      -144.3999998966904,
+      114.16138658999155
+    ],
+    "print_size_mm": [
+      7.2,
+      7.2,
+      9.161
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_mm": [
+        68.6000001,
+        161.6000001,
+        -104.9999999
+      ]
+    },
+    "mesh_facets": 994
+  },
+  {
+    "name": "Roof_spacer_1_R",
+    "orientation": [
+      0,
+      0,
+      0
+    ],
+    "note": "Bottom sits on cab tab; contoured top supports roof. Keep numbered front/rear pairs distinct.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      51.3999999,
+      -151.6000001,
+      104.9999999,
+      58.6000001,
+      -144.39999989226274,
+      114.16138658971
+    ],
+    "print_size_mm": [
+      7.2,
+      7.2,
+      9.161
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_mm": [
+        -41.3999999,
+        161.6000001,
+        -104.9999999
+      ]
+    },
+    "mesh_facets": 984
+  },
+  {
+    "name": "Roof_spacer_2_L",
+    "orientation": [
+      0,
+      0,
+      0
+    ],
+    "note": "Bottom sits on cab tab; contoured top supports roof. Keep numbered front/rear pairs distinct.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -58.6000001,
+      -204.1000001,
+      104.9999999,
+      -51.3999999,
+      -196.8999999,
+      116.44342903332802
+    ],
+    "print_size_mm": [
+      7.2,
+      7.2,
+      11.443
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_mm": [
+        68.6000001,
+        214.1000001,
+        -104.9999999
+      ]
+    },
+    "mesh_facets": 964
+  },
+  {
+    "name": "Roof_spacer_2_R",
+    "orientation": [
+      0,
+      0,
+      0
+    ],
+    "note": "Bottom sits on cab tab; contoured top supports roof. Keep numbered front/rear pairs distinct.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      51.3999999,
+      -204.1000001,
+      104.9999999,
+      58.6000001,
+      -196.8999999,
+      116.44342903327423
+    ],
+    "print_size_mm": [
+      7.2,
+      7.2,
+      11.443
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_mm": [
+        -41.3999999,
+        214.1000001,
+        -104.9999999
+      ]
+    },
+    "mesh_facets": 958
+  },
+  {
+    "name": "Roof_vent_grille",
+    "orientation": [
+      180,
+      0,
+      0
+    ],
+    "note": "Glue flange beneath vent opening; top recessed slightly below roof.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -24.0000001,
+      -195.0000001,
+      114.71699956819627,
+      24.0000001,
+      -162.9999999,
+      116.80000009999999
+    ],
+    "print_size_mm": [
+      48.0,
+      32.0,
+      2.083
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        1.0,
+        0.0,
+        0.0,
+        6.123233995736766e-17
+      ],
+      "translation_mm": [
+        34.0000001,
+        -152.9999999,
+        116.80000010000002
+      ]
+    },
+    "mesh_facets": 484
+  },
+  {
+    "name": "Front_grille",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "Glue in nose aperture; small seam gap around perimeter.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -42.0,
+      43.85,
+      22.0,
+      42.0,
+      44.85,
+      45.0
+    ],
+    "print_size_mm": [
+      84.0,
+      23.0,
+      1.0
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        52.0,
+        54.99999999999999,
+        -43.85
+      ]
+    },
+    "mesh_facets": 1076
+  },
+  {
+    "name": "Headlight_R",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "White printable cosmetic headlight insert; paint later if desired.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      41.0,
+      43.85,
+      34.0,
+      61.0,
+      45.300000000000004,
+      46.0
+    ],
+    "print_size_mm": [
+      20.0,
+      12.0,
+      1.45
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -31.0,
+        55.99999999999999,
+        -43.85000000000001
+      ]
+    },
+    "mesh_facets": 28
+  },
+  {
+    "name": "Headlight_L",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "White printable cosmetic headlight insert; paint later if desired.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -61.0,
+      43.85,
+      34.0,
+      -41.0,
+      45.300000000000004,
+      46.0
+    ],
+    "print_size_mm": [
+      20.0,
+      12.0,
+      1.45
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        71.0,
+        55.99999999999999,
+        -43.85000000000001
+      ]
+    },
+    "mesh_facets": 28
+  },
+  {
+    "name": "Quarter_grille_R",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "Sloped rear-quarter honeycomb insert; glue to window surround after assembling cab.",
+    "support": "Shallow local support under the curved outer face if needed",
+    "assembly_bounds_mm": [
+      66.0593511797628,
+      -242.0000001,
+      70.9999999,
+      92.30044988756133,
+      -204.99999989999998,
+      109.0000001
+    ],
+    "print_size_mm": [
+      38.0,
+      37.0,
+      26.241
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -60.99999990000002,
+        252.0000001,
+        92.30044988756131
+      ]
+    },
+    "mesh_facets": 1064
+  },
+  {
+    "name": "Quarter_grille_L",
+    "orientation": [
+      0,
+      -90,
+      0
+    ],
+    "note": "Sloped rear-quarter honeycomb insert; glue to window surround after assembling cab.",
+    "support": "Shallow local support under the curved outer face if needed",
+    "assembly_bounds_mm": [
+      -92.30044988756133,
+      -242.0000001,
+      70.9999999,
+      -66.0593511797628,
+      -204.99999989999998,
+      109.0000001
+    ],
+    "print_size_mm": [
+      38.0,
+      37.0,
+      26.241
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865476,
+        0.0,
+        -0.7071067811865475
+      ],
+      "translation_mm": [
+        119.00000009999998,
+        252.0000001,
+        92.30044988756134
+      ]
+    },
+    "mesh_facets": 1064
+  },
+  {
+    "name": "Rear_light_R",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "Inset rear lamp housing with raised hook-shaped lens detail; glue into tail aperture.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      47.0,
+      -350.35,
+      60.0,
+      101.0,
+      -348.85,
+      73.0
+    ],
+    "print_size_mm": [
+      54.0,
+      13.0,
+      1.5
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -37.0,
+        83.00000000000007,
+        350.35
+      ]
+    },
+    "mesh_facets": 56
+  },
+  {
+    "name": "Rear_light_L",
+    "orientation": [
+      90,
+      0,
+      0
+    ],
+    "note": "Inset rear lamp housing with raised hook-shaped lens detail; glue into tail aperture.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -101.0,
+      -350.35,
+      60.0,
+      -47.0,
+      -348.85,
+      73.0
+    ],
+    "print_size_mm": [
+      54.0,
+      13.0,
+      1.5
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.7071067811865475,
+        0.0,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        111.0,
+        83.00000000000007,
+        350.35
+      ]
+    },
+    "mesh_facets": 56
+  },
+  {
+    "name": "Front_bumper",
+    "orientation": [
+      0,
+      0,
+      0
+    ],
+    "note": "Two M3 screws along Y through bumper and nose; nuts accessible inside open shell. A 0.2 mm gap allows paint/glue.",
+    "support": "None; recess faces up",
+    "assembly_bounds_mm": [
+      -77.0,
+      45.2,
+      16.0,
+      77.0,
+      57.0,
+      23.0
+    ],
+    "print_size_mm": [
+      154.0,
+      11.8,
+      7.0
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_mm": [
+        87.0,
+        -35.2,
+        -16.0
+      ]
+    },
+    "mesh_facets": 1036
+  },
+  {
+    "name": "Rear_wing",
+    "orientation": [
+      0,
+      0,
+      0
+    ],
+    "note": "Flat bottom on bed; 236 mm span leaves 10 mm total allowance inside the 246 mm design envelope.",
+    "support": "None",
+    "assembly_bounds_mm": [
+      -118.0,
+      -384.0,
+      113.0,
+      118.0,
+      -344.0,
+      120.4
+    ],
+    "print_size_mm": [
+      236.0,
+      40.0,
+      7.4
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "translation_mm": [
+        128.0,
+        394.0,
+        -113.0
+      ]
+    },
+    "mesh_facets": 904
+  },
+  {
+    "name": "Wing_endplate_L",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "Glue over wing ends; 0.2 mm slot clearance.",
+    "support": "None; broad side on bed",
+    "assembly_bounds_mm": [
+      -118.0,
+      -386.0,
+      110.0,
+      -116.8,
+      -341.0,
+      136.0
+    ],
+    "print_size_mm": [
+      26.0,
+      45.0,
+      1.2
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -99.99999999999997,
+        396.0,
+        -116.80000000000003
+      ]
+    },
+    "mesh_facets": 44
+  },
+  {
+    "name": "Wing_endplate_R",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "Glue over wing ends; 0.2 mm slot clearance.",
+    "support": "None; broad side on bed",
+    "assembly_bounds_mm": [
+      116.80000000000001,
+      -386.0,
+      110.0,
+      118.00000000000001,
+      -341.0,
+      136.0
+    ],
+    "print_size_mm": [
+      26.0,
+      45.0,
+      1.2
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -100.00000000000003,
+        396.0,
+        117.99999999999999
+      ]
+    },
+    "mesh_facets": 44
+  },
+  {
+    "name": "Wing_pylon_L",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "M3 base screw through tail shell; M3 top screw through wing into side-loaded nut pocket; relieved base web clears lower screw head/driver.",
+    "support": "Small ledge supports at feet only; upright web prints flat",
+    "assembly_bounds_mm": [
+      -51.0000001,
+      -363.0,
+      75.67268066216324,
+      -36.9999999,
+      -330.9999999,
+      113.0
+    ],
+    "print_size_mm": [
+      37.327,
+      32.0,
+      14.0
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -65.67268066216323,
+        373.0,
+        -36.99999990000001
+      ]
+    },
+    "mesh_facets": 1458
+  },
+  {
+    "name": "Wing_pylon_R",
+    "orientation": [
+      0,
+      90,
+      0
+    ],
+    "note": "M3 base screw through tail shell; M3 top screw through wing into side-loaded nut pocket; relieved base web clears lower screw head/driver.",
+    "support": "Small ledge supports at feet only; upright web prints flat",
+    "assembly_bounds_mm": [
+      36.9999999,
+      -363.0,
+      75.67268066216324,
+      51.0000001,
+      -330.9999999,
+      113.0
+    ],
+    "print_size_mm": [
+      37.327,
+      32.0,
+      14.0
+    ],
+    "print_transform": {
+      "rotation_quaternion": [
+        0.0,
+        0.7071067811865475,
+        0.0,
+        0.7071067811865476
+      ],
+      "translation_mm": [
+        -65.67268066216326,
+        373.0,
+        51.00000009999999
+      ]
+    },
+    "mesh_facets": 1464
+  }
+]

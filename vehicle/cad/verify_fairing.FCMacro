@@ -1,0 +1,8 @@
+"""Read-only CAD/STL verification; writes fairing/verification.json."""
+from pathlib import Path
+import importlib.util
+import os
+CAD=Path(os.environ.get('RC_CAD_DIR',str(Path(__file__).resolve().parent)))
+spec=importlib.util.spec_from_file_location('rc_verify_fairing',CAD/'fairing'/'verify_fairing.py')
+verify=importlib.util.module_from_spec(spec);spec.loader.exec_module(verify)
+verify.main()

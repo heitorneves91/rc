@@ -1,0 +1,311 @@
+RC BUGGY FAIRING — REVISION 3: SEPARATE SURFACES / LOWER SUPPORT
+
+USER REQUIREMENTS AND REFERENCE
+The reference is fairing.png at the repository root. Revision 3 keeps the lower, curved, lightweight
+revision-2 envelope and replaces the large wraparound shell sections with
+independently oriented panels and integrated recessed glue laps. The requested corrections are:
+- Redesign shell splits for lower support, preserving the already printed rear
+  wing and front bumper exactly.
+- Two rear lamp housings/signatures like the reference; no rear grille.
+- Lower the whole body. Extra servo-saver accommodation is lateral, not an
+  excuse to raise the hood, skirt or roof.
+- The accepted assembly pose is already maximum suspension compression.
+  Reserve downward travel, not another 15 mm upward stroke.
+- Controlled curved surfaces and blended character lines, rather than boxes
+  or uncontrolled wavy lofts.
+- Thin cosmetic skins, two print walls and 5% infill, with less plastic.
+
+Print everything in white PLA if desired; lamp details can be painted later.
+Windows remain open, as on the detached body in the reference. Lights are
+cosmetic geometry, not electrical lamp holders. This is a dimensionally adapted
+interpretation of the image; the image contains no manufacturing dimensions.
+
+FILES AND REBUILD
+../fairing.FCStd is the separate body document. Its Fairing group contains the
+physical parts in the global car coordinates. PrintOrientations contains
+hidden, bed-oriented copies; show it alone. ClearanceReferences contains hidden
+non-printable saver and suspension envelopes. ../full_assembly.FCStd embeds
+the physical fairing under its Fairing group. No joints/live CAD links are used.
+The 74 accepted mechanical components remain unchanged.
+
+build_fairing.py is the editable design source. Change its P dictionary and
+geometry functions, then run ../rebuild_fairing.FCMacro in FreeCAD. The macro
+replaces only the fairing snapshots in the assembly. Close the separate Fairing
+document first. parameters.json is a generated audit snapshot, not a second
+input file. CAD metadata is explanatory: changing a text property alone does
+not regenerate surfaces or STLs.
+
+../rebuild_assembly.FCMacro reinstalls the existing fairing.FCStd when present,
+but does not redesign it. After changing mechanical placements, rebuild the
+fairing so its clearance references use the new wheel/pivot coordinates.
+Run ../verify_fairing.FCMacro after a rebuild. verification.json must say PASS.
+Precise minimum-distance searches are optional; verify.main(True) enables them.
+The required checks always use exact intersections and explicit clearance tools.
+render_fairing.py produces assembled, rear, isolated and exploded CAD previews.
+
+RESOURCE USE / CRASH RECOVERY
+Use a separate FreeCAD Python process restricted to two CPU cores, lower
+priority and roughly 4 GiB of process address space for heavy CAD work on this
+machine. A desktop crash occurred during development; saved scripts survived,
+while /tmp did not. Do not depend on /tmp caches for reproducibility.
+The repository includes run_headless.py for this bounded workflow. In a separate
+FreeCAD AppImage Python process, use:
+  <extracted FreeCAD>/AppRun python <repo>/vehicle/cad/fairing/run_headless.py build
+Use verify or render as the final argument for those stages. Do NOT execute
+this launcher inside an existing interactive FreeCAD console: its resource
+limits are intended for a disposable subprocess, not the whole user's GUI.
+The generator avoids combining dozens of overlapping tires into one Boolean.
+Steering-angle capsules remain separate and are cut serially. Do not revert to
+a huge multiFuse of the entire steering/travel sweep. The same rule applies to
+verification: check individual overlapping capsules, not a single compound cut.
+Save source/working checkpoints before an expensive rebuild. Do not interpret
+an unfinished build or an old PASS report as verification of new meshes.
+
+SURFACES, HEIGHT AND THICKNESS
+Coordinates: X across the car, +Y forward, +Z upward. Left is negative X.
+The existing assembly tire centers are Y=-32.5/-301, Z=28 at full compression.
+The nominal ground plane of that compressed pose is Z=-16.5. At normal ride
+height the wheels move downward relative to the chassis; do not mistake this
+compressed visualization for the normal ride height.
+
+The skirt is Z=3..11 rather than the former 18..26. Body mounting pads meet the
+shorter brackets at Z=11 instead of Z=26. Roof design stations are Z=116..118
+rather than 148. Hood and rear deck are lowered too. The existing camera/ESP32
+support still requires real clearance: its accepted highest point is Z=102.4.
+That hardware, not a vertical saver allowance, sets the minimum useful roof.
+Revision 3 trims only the free cabin skirt to the existing mounting-pad plane
+at Z=11 for flat bed contact; it does not lift the body or alter the pad/bolt
+interfaces. Front/tail contours retain their low skirts.
+Rear contours accommodate the actual shock tower locally; do not raise the
+entire body to resolve a local clash.
+
+The shell uses nominal 1.0 mm profile skins. Only screw pads, tabs and brackets
+are thicker. The wing plane is 1.4 mm with a thin rear lip/strakes; endplates
+are 1.2 mm. Do not attempt to save weight only by lowering infill: shell volume
+and support dominate this cosmetic body. CAD solid-mass estimates and actual
+slicer totals are separate values in the verification/slicer reports.
+
+Surface construction is explicit tensor B-spline patches: rounded quadratic
+Bezier cross-sections and shape-preserving cubic Hermite interpolation along
+Y. The Y parameter is fixed to the actual station coordinates. This avoids
+uncontrolled global-loft dips, ripples and mismatched inner/outer parameterization.
+The broad molded panels remain smooth while the intended styling edges remain
+defined. Keep the interpolation shape-preserving when changing stations.
+Nominal thickness is set in the X/Z profile; normal thickness on sloped surfaces
+may differ. Every physical solid and every final STL is checked.
+
+REAR END
+The former Tail_vent part and its STL are obsolete and must not be shipped.
+The center below the rear lamp beam is open, exposing the rear mechanics like
+the reference. Rear_light_L/R are separate thin housings with raised C/hook lens
+signatures. Paint is optional; their outline/detail exists in the geometry.
+There is no rear-center grille. Roof/front/quarter ventilation remains separate
+from this deleted rear grille.
+
+SERVO SAVER — LATERAL RESERVE
+The user specified approximately 20 mm added shaft length toward the chassis
+side. Reserve another 10 mm axial margin. In the accepted model the shaft tip
+is approximately (-27.625,-131.77,14.85), directed along -X. The 30 mm endpoint
+is (-57.625,-131.77,14.85). The empty lateral packaging box is:
+  X=-65..65, Y=-177..-78, Z=5..50 mm.
+The former Z=90 allowance is intentionally removed. The source saver diameter
+is still unknown. Check its radial outline and final replacement horn when
+modeled; retain the specified axial allowance. The shell, splices and mounting
+pads must not enter this reserve.
+
+SUSPENSION / STEERING
+Current assembly position is maximum compression. Revision 2 uses a continuous
+20 mm downward allowance and only 3 mm residual upward tolerance, because the
+user said the current pose could be a few millimetres below the exact stop.
+It must not use the old +/-15 mm travel assumption.
+
+Static arch capsules use 48.5 mm radius, extending from center Z=8 to Z=31,
+starting at X=+/-92. They cover the downward range and leave room around the
+44.5 mm source tires. Front motion uses 47.5 mm-radius, 42 mm-long inflated
+tires, steered about the actual knuckle axis from -30 to +30 degrees in 5-degree
+steps, each extended continuously through the same vertical travel. The wheel
+center is offset from the steering pivot: do not rotate it about its own center.
+Keep the angle tools separate for stable CAD computation.
+
+These are explicit clearance assumptions, not solved articulated wishbone
+trajectories. Camber/track may also change on the physical car. Recheck actual
+travel and the final saver/steering limit when those are measured. Do not change
+the accepted suspension placements just to make the fairing fit.
+
+PRINT KIT AND ORIENTATION — REVISION 3
+Why: the first physical Nose_R_1 print failed on its curved outer fender after
+critical-only supports and adaptive layers were enabled. See failure.jpeg at
+the repository root and PRINT_FAILURE_NOTES.txt. A hood + fender + deep skirt
+in one part forced support-heavy compromises; changing the split is preferable
+to accepting a support forest or unsupported exterior curves.
+
+The exterior B-spline surfaces, overall height and clearances remain as in
+revision 2. The transverse body junctions remain Y=-90/-246, with 0.30 mm gaps.
+New shell splits (mirrored left/right):
+FreeCAD rotation +90 degrees around X makes +Y the upward build direction.
+-90 degrees makes -Y upward. Check the actual first layers; labels alone do
+not prove the intended end is on the bed. The verifier checks these directions
+and requires substantial bed contact beneath each cabin sill.
+- Nose_hood: X=0.15..84.85, full nose length. Print center seam edge down.
+- Nose_fender_aft: X>=85.15, Y=-89.85..-32.65. Rear cut edge down, build forward.
+- Nose_fender_fore: X>=85.15, Y=-32.35..9.85. Forward cut edge down, build aft.
+- Nose_cheek: X>=85.15, Y>=10.15. Rear cut edge down, build forward.
+- Tail_deck: X=0.15..84.85. Center seam edge down.
+- Tail_fender_aft: X>=85.15, Y<=-301.15. Rear end down, build forward.
+- Tail_fender_fore: X>=85.15, Y>=-300.85. Front end down, build aft.
+- Cab_sill: Z=11..69.85, with unchanged chassis mounting pads. The free skirt
+  is trimmed to the existing pad underside at Z=11: pads and the complete sill
+  start on the bed together, instead of on tiny curved skirt tips.
+- Cab_frame: Z=70.15..104.85. Roof cut edge down, making a short inverted frame
+  instead of a 156 mm tall window surround.
+The hood/deck panels are mostly vertical in their build orientation. Separate
+fenders build from their broad transverse ends toward the wheel crown, so the
+arch removes material as printing progresses rather than creating a long
+unsupported roof above an empty arch.
+
+Recessed, integrated glue laps replace a pile of separate new splice parts.
+Their roots taper over 4 mm in the build direction, so a recessed lap does not
+first appear as a floating island that creates its own tall support tower.
+Nominal glue allowance is 0.4 mm, lap thickness 0.8 mm; local webs connect each
+lap to its owner panel only. Hood/deck laps extend under the separate fenders;
+aft fender laps bridge the wheel-center split; a separate shallow
+Join_Nose_cheek strip bridges the Y=10 seam so both panels keep their broad
+transverse edge on the bed; sill laps support the front/rear pillars and B-pillar of the frame.
+Do not sand these laps flush or force them into zero-clearance contact. Dry-fit
+and use PLA-compatible adhesive. There is one small separate cheek joiner per side, not a new joiner at every
+seam. The original transverse/centerline backing
+strips remain in the kit for joining the assembled nose/cab/tail sections. Rear
+transverse backing now stops at Z=61, below the new pillar lap at Z=63; do not
+restore its old height or it will overlap the sill lap.
+
+ALREADY PRINTED — DO NOT REPRINT
+The user confirmed Rear_wing_1 and Front_bumper_1 printed successfully. Their
+physical B-reps, mesh bytes, hole positions and mating interfaces are locked in
+printed_reference/. The complete CAD/manifest still include them, with
+already_printed=true. The default Bambu project and print ZIP queue the remaining
+parts only. Wing endplates and pylons are separate components and are still
+included; the user did not report them as printed. Use slice_fairing.py
+--include-printed only when a complete replacement kit is actually wanted.
+
+Every STL is pre-oriented and grounded at Z=0. Leave automatic 3D orientation
+OFF and keep the supplied arrangement in fairing-P1S.3mf. plate_layout.json
+records deterministic packing with 20 mm between model boxes and room for the
+P1S exclusion area. Never nest accessories in the shells: supports/brims can
+conflict. All physical parts fit a conservative 246 mm envelope within the
+256 mm cubic P1S volume. Locked wing span is 236 mm.
+
+Settings: P1S, 0.4 mm nozzle, 0.20 mm fixed layers, TWO walls, FIVE percent infill,
+Arachne, 6 mm outer brim, automatic tree supports from the bed, 35-degree
+threshold. Critical-only supports are explicitly OFF, as is small-overhang
+removal. Top interface: 3 layers, 0.35 mm spacing. Outer walls 60 mm/s, inner
+walls 100 mm/s. Use the actual PLA profile and appropriate cooling. Short local
+supports remain appropriate for tabs, mounting pads, vent/window edges and
+curved accessories. Inspect all support interfaces and islands in Preview.
+Reduced support is not support-free and a sliced PASS is not a successful print.
+
+package_print.py rebuilds the remaining-parts ZIP and checksums after successful
+CAD verification, slicing, support comparison and preview inspection.
+
+Start with the supplied fixed layers; adaptive layers can be reconsidered after
+a successful shell test. Adaptive layers do not substitute for overhang support.
+The model-only 3MF contains no G-code. Re-slice for the actual printer/filament.
+Final queued masses, support usage, time and plates are in slicer_report.json.
+Bambu main_used_g includes brim; the report separates support and estimates brim
+from feature-tagged extrusion, rather than labeling all main material as model.
+compare_support.py --rebuild-baseline regenerates the archived revision-2
+baseline with the current process; without the flag it compares existing
+reports and checks identical resolved profile hashes.
+support_comparison.json records a matched revision-2/3 comparison with the same
+support settings and the already printed wing/bumper excluded from both queues.
+Do not compare a safer support profile directly to the old critical-only mass
+as though it were a controlled geometry test.
+
+slice_fairing.py reproduces packing, slicing checks and model-only export with
+the installed Bambu Studio at two cores / 4 GiB. Toolpath conflict checks stay
+enabled. --source accepts a self-contained manifest/STL/process directory for
+matched comparisons. The assemble-list format follows the official source and
+sample: https://github.com/bambulab/BambuStudio/issues/3544 . No G-code ships.
+The revision-2 archive preserves prior CAD, script, print STLs and ZIP, plus
+the user's then-current edited 3MF. That edited 3MF is not the original default
+orientation/settings and is retained as evidence, not a revision-3 print file.
+
+ASSEMBLY / HARDWARE
+1. Dry-fit the four short brackets first. Their lower holes reuse existing
+   chassis/table holes at X=+/-66.4, Y=-179.6/-232.4. Bases remain Z=-3..0.
+   The upper pad screw centers are X=+/-77.5; bracket tops meet pads at Z=11.
+   Use loose M3 nuts under the feet; uprights leave lateral nut access.
+2. Dry-fit and glue each nose/cab/tail panel set using its integrated laps,
+   then dry-fit the assembled sections in their CAD positions. STLs are relocated
+   for printing; use CAD/manifest assembly bounds to place them.
+3. Glue the continuous inner strips across the transverse seams, plus the
+   centerline nose/tail bridges. There is one useful strip per side per
+   transverse seam; incidental small slivers were deliberately omitted.
+   Backing has 0.4 mm nominal glue allowance. Use adhesive suitable for PLA.
+4. Glue front grille, headlights, quarter inserts and both rear lamp housings
+   into their apertures. Do not reinstall the old rear vent/grid. Keep vents open.
+5. Keep front/rear roof spacer pairs distinct: their contoured tops support the
+   roof on its four tabs. Fasten with M3 screws/nuts. Leave the roof removable
+   for access to the mechanism and electronics.
+6. Bolt wing pylons to the tail and reuse the already printed wing. The base webs have head/driver relief. Wing
+   screws use side-loaded M3 nut pockets; glue endplates over the wing edges.
+7. Reuse the already printed bumper with two M3 screws along Y through the nose. Nuts remain
+   accessible through the open underside. Face/glue clearance is 0.2 mm.
+
+Hardware starting choices (confirm actual washers/installed table fixings):
+  M3 x 8: eight (four body pads, two wing bases, two wing top joints)
+  M3 x 16: six (four chassis brackets, two front roof joints)
+  M3 x 20: two (bumper)
+  M3 x 25: two (rear roof joints)
+  M3 nuts: eighteen total joints, including reused/replaced chassis nuts
+  M3 washers as appropriate; PLA-compatible adhesive
+Holes are 3.4 mm. Wing nut pockets are 6.0 mm across flats, 2.8 mm deep. Lengths
+are starting choices based on printed stacks, not measured hardware in hand.
+Fasteners themselves are not modeled.
+
+VERIFICATION AND FUTURE AGENTS
+Preserve the accepted 74 mechanical components, including rear shocks behind
+the same chassis ears, front shocks on lower-arm centers, rear shocks on aft
+lower-arm ends, correct ball-socket directions and aligned servo mounts. No
+chassis locks. No new joints, solver proxies or cross-document dependency loops.
+
+Required after any geometry change:
+- Rebuild the separate CAD, installed assembly snapshots and every STL.
+- Archive/remove obsolete generated STLs; do not include stale parts in the kit.
+- Verify one valid solid per physical component, watertight meshes, grounded
+  orientations, P1S bounds and mesh/CAD volume agreement.
+- Verify exact intersections against all mechanics, between printed parts,
+  against the lateral saver reserve and against every individual motion capsule.
+- Keep full_assembly's 74 mechanical identities/placements unchanged.
+- Re-render native CAD, including rear view, and visually inspect the surfaces.
+- Verify locked wing/bumper B-reps and mesh hashes; never change their interfaces.
+- Re-slice all remaining final parts at two walls / 5% infill. Update model-only 3MF,
+  print manifest, slicer report, checksums and fairing-print.zip together.
+- Update these instructions and vehicle/AGENTS.md when assumptions change.
+
+Never rely on a previous PASS report or old mass estimate after editing shapes.
+Use optimalBoundingBox() / mesh bounds for trimmed surfaces. Do not fix a
+collision by ignoring the verifier or by adding unnecessary whole-body height.
+
+VERIFIED REVISION-3 SLICE — REMAINING KIT
+49 physical CAD components: 2 already printed/reused and 47 queued on 5 plates.
+Queued material: model 165.194 g + brim 7.902 g + support 50.483 g = 223.579 g.
+Queued time: 13.985 hours. Compared with revision-2 geometry at the SAME safer
+settings (critical-only OFF), support drops 96.691 -> 50.483 g: 47.79% less.
+Total queued material drops 265.192 -> 223.579 g: 15.69% less. The old critical-
+only 273 g complete-kit figure is not the matched baseline for this comparison.
+The right nose changes from 18.649 g support to 3.212 g for its four panels and
+one small backing strip: about 82.8% less. Both right nose fender segments need
+zero generated support in this slice; the hood/cheek/joiner retain local support.
+These are computed slicer estimates, not physical success claims. Start by
+printing/dry-fitting the revised right-nose set before committing the whole kit.
+The complete CAD solid-volume estimate includes the reused wing/bumper and is
+a different scope from the remaining-kit slicer mass. Do not add/subtract them
+as though they were the same measurement.
+
+Orientation validation now checks actual +Y/-Y build direction for each fender
+and cheek. Both cabin sills have about 561 mm^2 first-layer section at their
+pad plane; the rejected Z=5 variant contacted only tiny curved tips. These are
+functional validation checks, not labels inferred from Euler-angle comments.
+support_material.py attributes generated support to models and checks its sum
+against Bambu's official support total (within 0.1 g); slice_fairing.py records
+this in the report for future targeted improvement.

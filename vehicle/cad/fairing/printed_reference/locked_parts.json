@@ -1,0 +1,12 @@
+{
+  "Rear_wing": {
+    "stl_sha256": "aef1dd395daec0e9e1f0db2cfd533586249d8406f7a20e0c8ade1f6d372e775c",
+    "cad_volume_mm3": 15129.77823224719,
+    "status": "Successfully printed, user confirmed. Reuse; do not reprint or change interfaces."
+  },
+  "Front_bumper": {
+    "stl_sha256": "8980e7e4e859dab5b19e1c938c8ed5f118c529fea8812872b3388d6d826ede56",
+    "cad_volume_mm3": 10418.954488074785,
+    "status": "Successfully printed, user confirmed. Reuse; do not reprint or change interfaces."
+  }
+}

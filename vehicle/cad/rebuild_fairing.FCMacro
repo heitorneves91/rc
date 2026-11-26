@@ -1,0 +1,21 @@
+"""Rebuild fairing.FCStd, oriented STLs, then update full_assembly.FCStd.
+Close Fairing first. Source mechanical parts and car.FCStd are never modified.
+"""
+from pathlib import Path
+import importlib.util
+import os
+import FreeCAD as App
+CAD=Path(os.environ.get('RC_CAD_DIR',str(Path(__file__).resolve().parent)))
+spec=importlib.util.spec_from_file_location('rc_fairing',CAD/'fairing'/'build_fairing.py')
+fairing=importlib.util.module_from_spec(spec);spec.loader.exec_module(fairing)
+fairing.main()
+assembly=next((d for d in App.listDocuments().values() if d.FileName and Path(d.FileName).resolve()==(CAD/'full_assembly.FCStd').resolve()),None)
+if assembly is None:assembly=App.openDocument(str(CAD/'full_assembly.FCStd'))
+fairing.install_into_assembly(assembly)
+App.setActiveDocument(assembly.Name)
+if App.GuiUp:
+ import FreeCADGui as Gui
+ from PySide6.QtTest import QTest
+ Gui.activeDocument().activeView().setCameraOrientation((.4247082003,.1759198966,.3398511430,.8204732386))
+ QTest.qWait(1200);Gui.activeDocument().activeView().fitAll()
+assembly.recompute();assembly.save()

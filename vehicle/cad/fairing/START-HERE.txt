@@ -1,0 +1,30 @@
+RC FAIRING REVISION 3 — LOWER SUPPORT / P1S / WHITE PLA
+
+Open fairing/fairing-P1S.3mf in Bambu Studio. The queue has 47 parts
+on 5 plates. The complete CAD contains 49 components.
+REUSE your successfully printed Rear_wing_1 and Front_bumper_1: they are unchanged
+and omitted from this print queue. Their endplates/pylons remain to be printed.
+
+Use the supplied orientations and arrangement. Select your actual PLA profile
+and re-slice before printing. Two walls, 5% infill, fixed 0.20 mm layers, Arachne,
+6 mm brim, automatic trees. Critical-only supports are OFF. Do not disable all
+supports. Inspect the fender curves, interfaces, tabs and window corners in
+Preview. Toolpath conflict checks remain enabled. No G-code is supplied.
+
+Large wraparound shells are replaced with separate hood/deck panels, short
+fenders, cabin sills and window frames. Tapered recessed glue laps align most
+joints. Each nose has FOUR main panels plus ONE small cheek backing strip.
+Dry-fit first. Read FAIRING.txt and use the exploded CAD preview for assembly.
+The original complete Nose_L/R, Cab_L/R and Tail_L/R STLs are obsolete.
+
+Queued slicer estimates: 165.2 g model,
+7.9 g brim, 50.5 g support;
+223.6 g total, 13.98 hours.
+Matched old/new support comparison: 47.8% less support.
+These are predictions, not measurements of a successful physical print.
+Start with the revised right-nose components before committing the full kit.
+
+The preview nose-print-orientations.png is an explanatory layout of the parts,
+not the actual plate arrangement or a picture of generated supports.
+Native editable fairing.FCStd and integrated full_assembly.FCStd are supplied
+separately. Use those for fit checks; do not print the full assembly as one item.

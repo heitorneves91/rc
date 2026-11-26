@@ -1,0 +1,651 @@
+{
+  "status": "PASS",
+  "revision": 2,
+  "software": "Bambu Studio 02.08.02.61",
+  "printer": "Bambu Lab P1S 0.4 nozzle",
+  "filament": "Generic PLA, white",
+  "layer_height_mm": 0.2,
+  "walls": 2,
+  "infill_percent": 5,
+  "supports": "Automatic tree, build plate only, threshold 35 degrees",
+  "brim_mm": 6,
+  "auto_3d_orientation": false,
+  "parts": 35,
+  "plates": 4,
+  "estimated_total_hours": 12.928,
+  "estimated_model_g": 194.738,
+  "estimated_total_g": 272.947,
+  "baseline_revision1_total_g": 508.679,
+  "cli_return_code": 0,
+  "layout": "Deterministic bounding rectangles, 20 mm model-box separation; no nesting",
+  "plate_details": [
+    {
+      "feature_type_times": {
+        "Bottom surface": 81.27448272705078,
+        "Bridge": 441.19720458984375,
+        "Brim": 272.6806945800781,
+        "Custom": 34.70222091674805,
+        "Gap infill": 32.722103118896484,
+        "Inner wall": 709.0576782226562,
+        "Internal solid infill": 528.7260131835938,
+        "Outer wall": 5108.31201171875,
+        "Overhang wall": 887.4280395507812,
+        "Sparse infill": 34.14175796508789,
+        "Support": 3472.381591796875,
+        "Support interface": 381.0577087402344,
+        "Top surface": 565.2755737304688,
+        "Travel": 2720.99365234375,
+        "Undefined": 2706.372314453125
+      },
+      "filament_change_times": 0,
+      "filaments": [
+        {
+          "filament_id": "GFL99",
+          "id": 1,
+          "main_used_g": 38.884521484375,
+          "total_used_g": 62.84326934814453
+        }
+      ],
+      "generate_support_material_time": 15223,
+      "id": 1,
+      "infill_time": 2666,
+      "layer_filament_change": 0,
+      "main_predication": 15234.5869140625,
+      "make_perimeters_time": 4016,
+      "obj_cached_cnt": 0,
+      "objects": [
+        {
+          "bbox": {
+            "depth": 87.92115020751953,
+            "height": 12.84996223449707,
+            "width": 140.86732482910156,
+            "x": 10.000595092773438,
+            "y": 38.0,
+            "z": 4.932637602905743e-05
+          },
+          "id": 15,
+          "name": "Roof_cap_1",
+          "triangle_count": 16046
+        },
+        {
+          "bbox": {
+            "depth": 99.2581787109375,
+            "height": 155.6999969482422,
+            "width": 109.3367919921875,
+            "x": 10.0,
+            "y": 145.92100524902344,
+            "z": 5.049999174389086e-08
+          },
+          "id": 35,
+          "name": "Cab_L_1",
+          "triangle_count": 17404
+        },
+        {
+          "bbox": {
+            "depth": 23.0,
+            "height": 1.0,
+            "width": 84.0,
+            "x": 139.33700561523438,
+            "y": 145.92100524902344,
+            "z": 0.0
+          },
+          "id": 55,
+          "name": "Front_grille_1",
+          "triangle_count": 1076
+        },
+        {
+          "bbox": {
+            "depth": 32.0,
+            "height": 2.083000421524048,
+            "width": 48.0,
+            "x": 139.33700561523438,
+            "y": 188.92100524902344,
+            "z": 1.6920927237151773e-07
+          },
+          "id": 75,
+          "name": "Roof_vent_grille_1",
+          "triangle_count": 484
+        },
+        {
+          "bbox": {
+            "depth": 37.0,
+            "height": 26.241098403930664,
+            "width": 38.0,
+            "x": 207.33700561523438,
+            "y": 188.92100524902344,
+            "z": 4.999999703159119e-08
+          },
+          "id": 95,
+          "name": "Quarter_grille_R_1",
+          "triangle_count": 1064
+        },
+        {
+          "bbox": {
+            "depth": 37.0,
+            "height": 26.241098403930664,
+            "width": 38.0,
+            "x": 170.8679962158203,
+            "y": 38.0,
+            "z": 4.999999703159119e-08
+          },
+          "id": 115,
+          "name": "Quarter_grille_L_1",
+          "triangle_count": 1064
+        },
+        {
+          "bbox": {
+            "depth": 16.0,
+            "height": 10.25279426574707,
+            "width": 60.0,
+            "x": 170.8679962158203,
+            "y": 95.0,
+            "z": 5.000000413701855e-08
+          },
+          "id": 135,
+          "name": "Splice_Rear_L1_1",
+          "triangle_count": 1132
+        },
+        {
+          "bbox": {
+            "depth": 14.0,
+            "height": 21.100000381469727,
+            "width": 14.0,
+            "x": 228.8679962158203,
+            "y": 38.0,
+            "z": 0.0
+          },
+          "id": 155,
+          "name": "Mount_1_R_1",
+          "triangle_count": 884
+        }
+      ],
+      "sliced_time": 30673,
+      "sliced_time_with_cache": 7987,
+      "total_predication": 15254.6376953125,
+      "triangle_count": 39154,
+      "warning_message": ""
+    },
+    {
+      "feature_type_times": {
+        "Bottom surface": 202.1166229248047,
+        "Bridge": 98.29606628417969,
+        "Brim": 369.1907958984375,
+        "Custom": 34.77782440185547,
+        "Gap infill": 6.296377658843994,
+        "Inner wall": 532.68994140625,
+        "Internal solid infill": 591.92578125,
+        "Outer wall": 4354.64501953125,
+        "Overhang wall": 127.95681762695312,
+        "Sparse infill": 20.194902420043945,
+        "Support": 2320.40625,
+        "Support interface": 95.35694122314453,
+        "Top surface": 203.62063598632812,
+        "Travel": 2072.12451171875,
+        "Undefined": 2057.395263671875
+      },
+      "filament_change_times": 0,
+      "filaments": [
+        {
+          "filament_id": "GFL99",
+          "id": 1,
+          "main_used_g": 51.720462799072266,
+          "total_used_g": 71.09880828857422
+        }
+      ],
+      "generate_support_material_time": 6446,
+      "id": 2,
+      "infill_time": 585,
+      "layer_filament_change": 0,
+      "main_predication": 10995.205078125,
+      "make_perimeters_time": 4913,
+      "obj_cached_cnt": 0,
+      "objects": [
+        {
+          "bbox": {
+            "depth": 99.2581787109375,
+            "height": 155.6999969482422,
+            "width": 109.33670043945312,
+            "x": 317.20001220703125,
+            "y": 38.0,
+            "z": 5.050004858730972e-08
+          },
+          "id": 175,
+          "name": "Cab_R_1",
+          "triangle_count": 17368
+        },
+        {
+          "bbox": {
+            "depth": 82.21543884277344,
+            "height": 103.8499984741211,
+            "width": 131.21421813964844,
+            "x": 317.20025634765625,
+            "y": 157.25799560546875,
+            "z": 5.000001124244591e-08
+          },
+          "id": 195,
+          "name": "Tail_L_1",
+          "triangle_count": 25230
+        },
+        {
+          "bbox": {
+            "depth": 32.0,
+            "height": 14.0,
+            "width": 37.32732391357422,
+            "x": 468.41400146484375,
+            "y": 38.0,
+            "z": 5.000000058430487e-08
+          },
+          "id": 215,
+          "name": "Wing_pylon_L_1",
+          "triangle_count": 1458
+        },
+        {
+          "bbox": {
+            "depth": 32.0,
+            "height": 14.0,
+            "width": 37.327308654785156,
+            "x": 446.5370178222656,
+            "y": 90.0,
+            "z": 5.000000058430487e-08
+          },
+          "id": 235,
+          "name": "Wing_pylon_R_1",
+          "triangle_count": 1464
+        },
+        {
+          "bbox": {
+            "depth": 45.0,
+            "height": 1.2000000476837158,
+            "width": 25.99997329711914,
+            "x": 525.7410278320312,
+            "y": 38.0,
+            "z": -7.105427357601002e-15
+          },
+          "id": 255,
+          "name": "Wing_endplate_L_1",
+          "triangle_count": 44
+        },
+        {
+          "bbox": {
+            "depth": 45.0,
+            "height": 1.2000000476837158,
+            "width": 25.999988555908203,
+            "x": 503.864013671875,
+            "y": 103.0,
+            "z": -7.105427357601002e-15
+          },
+          "id": 275,
+          "name": "Wing_endplate_R_1",
+          "triangle_count": 44
+        },
+        {
+          "bbox": {
+            "depth": 16.0,
+            "height": 10.25279426574707,
+            "width": 60.000003814697266,
+            "x": 468.41400146484375,
+            "y": 168.0,
+            "z": 5.000000413701855e-08
+          },
+          "id": 295,
+          "name": "Splice_Rear_R1_1",
+          "triangle_count": 1128
+        },
+        {
+          "bbox": {
+            "depth": 13.0,
+            "height": 1.5,
+            "width": 54.000003814697266,
+            "x": 468.41400146484375,
+            "y": 204.0,
+            "z": 0.0
+          },
+          "id": 315,
+          "name": "Rear_light_R_1",
+          "triangle_count": 56
+        },
+        {
+          "bbox": {
+            "depth": 7.19959020614624,
+            "height": 9.161380767822266,
+            "width": 7.199942588806152,
+            "x": 468.4140625,
+            "y": 237.00001525878906,
+            "z": 4.999999703159119e-08
+          },
+          "id": 335,
+          "name": "Roof_spacer_1_L_1",
+          "triangle_count": 994
+        },
+        {
+          "bbox": {
+            "depth": 7.19961404800415,
+            "height": 9.16135311126709,
+            "width": 7.199836254119873,
+            "x": 495.6141662597656,
+            "y": 237.00038146972656,
+            "z": 4.999999703159119e-08
+          },
+          "id": 355,
+          "name": "Roof_spacer_1_R_1",
+          "triangle_count": 984
+        },
+        {
+          "bbox": {
+            "depth": 7.199995517730713,
+            "height": 11.443185806274414,
+            "width": 7.1999735832214355,
+            "x": 522.8140258789062,
+            "y": 237.0,
+            "z": 4.999999703159119e-08
+          },
+          "id": 375,
+          "name": "Roof_spacer_2_L_1",
+          "triangle_count": 964
+        },
+        {
+          "bbox": {
+            "depth": 7.199507236480713,
+            "height": 11.443384170532227,
+            "width": 7.199210166931152,
+            "x": 542.414794921875,
+            "y": 204.00039672851562,
+            "z": 4.999999703159119e-08
+          },
+          "id": 395,
+          "name": "Roof_spacer_2_R_1",
+          "triangle_count": 958
+        }
+      ],
+      "sliced_time": 19613,
+      "sliced_time_with_cache": 6986,
+      "total_predication": 11015.22265625,
+      "triangle_count": 50692,
+      "warning_message": ""
+    },
+    {
+      "feature_type_times": {
+        "Bottom surface": 206.3503875732422,
+        "Bridge": 103.70734405517578,
+        "Brim": 304.0465393066406,
+        "Custom": 34.81237030029297,
+        "Gap infill": 5.131072998046875,
+        "Inner wall": 519.1246337890625,
+        "Internal solid infill": 477.14208984375,
+        "Outer wall": 3973.006591796875,
+        "Overhang wall": 219.49253845214844,
+        "Sparse infill": 35.41670608520508,
+        "Support": 2351.4697265625,
+        "Support interface": 92.39340209960938,
+        "Top surface": 222.83816528320312,
+        "Travel": 2144.727783203125,
+        "Undefined": 2129.8359375
+      },
+      "filament_change_times": 0,
+      "filaments": [
+        {
+          "filament_id": "GFL99",
+          "id": 1,
+          "main_used_g": 53.42842102050781,
+          "total_used_g": 73.31544494628906
+        }
+      ],
+      "generate_support_material_time": 8478,
+      "id": 3,
+      "infill_time": 699,
+      "layer_filament_change": 0,
+      "main_predication": 10655.0908203125,
+      "make_perimeters_time": 4496,
+      "obj_cached_cnt": 0,
+      "objects": [
+        {
+          "bbox": {
+            "depth": 82.2154541015625,
+            "height": 103.8499984741211,
+            "width": 131.21421813964844,
+            "x": 10.0,
+            "y": -269.20001220703125,
+            "z": 5.000001124244591e-08
+          },
+          "id": 415,
+          "name": "Tail_R_1",
+          "triangle_count": 25176
+        },
+        {
+          "bbox": {
+            "depth": 80.55593872070312,
+            "height": 134.85000610351562,
+            "width": 131.2138214111328,
+            "x": 10.00088119506836,
+            "y": -166.98500061035156,
+            "z": 5.000001124244591e-08
+          },
+          "id": 435,
+          "name": "Nose_L_1",
+          "triangle_count": 40252
+        },
+        {
+          "bbox": {
+            "depth": 13.000012397766113,
+            "height": 1.5,
+            "width": 54.0,
+            "x": 161.21499633789062,
+            "y": -269.20001220703125,
+            "z": 0.0
+          },
+          "id": 455,
+          "name": "Rear_light_L_1",
+          "triangle_count": 56
+        },
+        {
+          "bbox": {
+            "depth": 25.999996185302734,
+            "height": 3.2105183601379395,
+            "width": 18.0,
+            "x": 161.21400451660156,
+            "y": -236.1999969482422,
+            "z": 1.6920928658237244e-07
+          },
+          "id": 475,
+          "name": "Splice_center_Tail_1",
+          "triangle_count": 160
+        },
+        {
+          "bbox": {
+            "depth": 23.999996185302734,
+            "height": 9.925521850585938,
+            "width": 18.0,
+            "x": 199.21400451660156,
+            "y": -236.1999969482422,
+            "z": 4.999999703159119e-08
+          },
+          "id": 495,
+          "name": "Splice_center_Nose_1",
+          "triangle_count": 212
+        },
+        {
+          "bbox": {
+            "depth": 12.811841011047363,
+            "height": 4.474157810211182,
+            "width": 28.065170288085938,
+            "x": 199.21400451660156,
+            "y": -192.1999969482422,
+            "z": 4.999999703159119e-08
+          },
+          "id": 515,
+          "name": "Splice_Front_L1_1",
+          "triangle_count": 80
+        },
+        {
+          "bbox": {
+            "depth": 12.811841011047363,
+            "height": 4.474157810211182,
+            "width": 28.065170288085938,
+            "x": 161.21499633789062,
+            "y": -159.38800048828125,
+            "z": 4.999999703159119e-08
+          },
+          "id": 535,
+          "name": "Splice_Front_R1_1",
+          "triangle_count": 74
+        },
+        {
+          "bbox": {
+            "depth": 11.99999713897705,
+            "height": 1.4500000476837158,
+            "width": 20.0,
+            "x": 209.27999877929688,
+            "y": -159.38800048828125,
+            "z": -3.552713678800501e-15
+          },
+          "id": 555,
+          "name": "Headlight_R_1",
+          "triangle_count": 28
+        },
+        {
+          "bbox": {
+            "depth": 11.99999713897705,
+            "height": 1.4500000476837158,
+            "width": 20.0,
+            "x": 209.27999877929688,
+            "y": -127.38800048828125,
+            "z": -3.552713678800501e-15
+          },
+          "id": 575,
+          "name": "Headlight_L_1",
+          "triangle_count": 28
+        },
+        {
+          "bbox": {
+            "depth": 13.99999713897705,
+            "height": 21.100000381469727,
+            "width": 14.0,
+            "x": 161.21499633789062,
+            "y": -126.57600402832031,
+            "z": 0.0
+          },
+          "id": 595,
+          "name": "Mount_1_L_1",
+          "triangle_count": 884
+        },
+        {
+          "bbox": {
+            "depth": 13.99999713897705,
+            "height": 21.100000381469727,
+            "width": 14.0,
+            "x": 161.21499633789062,
+            "y": -92.57600402832031,
+            "z": 0.0
+          },
+          "id": 615,
+          "name": "Mount_2_R_1",
+          "triangle_count": 884
+        },
+        {
+          "bbox": {
+            "depth": 13.99999713897705,
+            "height": 21.100000381469727,
+            "width": 14.0,
+            "x": 195.21499633789062,
+            "y": -95.38800048828125,
+            "z": 0.0
+          },
+          "id": 635,
+          "name": "Mount_2_L_1",
+          "triangle_count": 884
+        }
+      ],
+      "sliced_time": 18985,
+      "sliced_time_with_cache": 4641,
+      "total_predication": 10674.98046875,
+      "triangle_count": 68718,
+      "warning_message": ""
+    },
+    {
+      "feature_type_times": {
+        "Bottom surface": 409.2629699707031,
+        "Bridge": 75.6702880859375,
+        "Brim": 282.98291015625,
+        "Custom": 35.35139083862305,
+        "Gap infill": 6.181662559509277,
+        "Inner wall": 384.708251953125,
+        "Internal solid infill": 1107.120849609375,
+        "Outer wall": 3655.302001953125,
+        "Overhang wall": 25.361467361450195,
+        "Sparse infill": 58.2733268737793,
+        "Support": 2001.512939453125,
+        "Support interface": 11.0442476272583,
+        "Top surface": 320.86029052734375,
+        "Travel": 1238.32275390625,
+        "Undefined": 1222.94189453125
+      },
+      "filament_change_times": 0,
+      "filaments": [
+        {
+          "filament_id": "GFL99",
+          "id": 1,
+          "main_used_g": 50.70493698120117,
+          "total_used_g": 65.6896743774414
+        }
+      ],
+      "generate_support_material_time": 5755,
+      "id": 4,
+      "infill_time": 538,
+      "layer_filament_change": 0,
+      "main_predication": 9576.6259765625,
+      "make_perimeters_time": 2473,
+      "obj_cached_cnt": 0,
+      "objects": [
+        {
+          "bbox": {
+            "depth": 80.55595397949219,
+            "height": 134.85000610351562,
+            "width": 131.2138214111328,
+            "x": 317.20001220703125,
+            "y": -269.20001220703125,
+            "z": 5.00003807246685e-08
+          },
+          "id": 655,
+          "name": "Nose_R_1",
+          "triangle_count": 40220
+        },
+        {
+          "bbox": {
+            "depth": 39.999996185302734,
+            "height": 7.400000095367432,
+            "width": 235.99998474121094,
+            "x": 317.20001220703125,
+            "y": -168.6429901123047,
+            "z": 0.0
+          },
+          "id": 675,
+          "name": "Rear_wing_1",
+          "triangle_count": 904
+        },
+        {
+          "bbox": {
+            "depth": 11.799996376037598,
+            "height": 7.0,
+            "width": 153.99998474121094,
+            "x": 317.20001220703125,
+            "y": -108.64299011230469,
+            "z": 0.0
+          },
+          "id": 695,
+          "name": "Front_bumper_1",
+          "triangle_count": 1036
+        }
+      ],
+      "sliced_time": 11252,
+      "sliced_time_with_cache": 1970,
+      "total_predication": 9596.56640625,
+      "triangle_count": 42160,
+      "warning_message": ""
+    }
+  ],
+  "notes": [
+    "All final parts sliced; no G-code is distributed.",
+    "Current assembly is the highest suspension position; travel reserve is downward, with 3 mm residual upward tolerance.",
+    "Run used two CPU cores at lower priority and a 4 GiB process limit."
+  ]
+}

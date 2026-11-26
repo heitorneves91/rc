@@ -1,0 +1,21 @@
+{
+  "type": "process",
+  "name": "RC fairing lightweight 0.20 PLA P1S",
+  "from": "User",
+  "inherits": "0.20mm Standard @BBL P1P",
+  "compatible_printers": [
+    "Bambu Lab P1S 0.4 nozzle"
+  ],
+  "compatible_printers_condition": "",
+  "print_settings_id": "RC fairing lightweight 0.20 PLA P1S",
+  "layer_height": "0.2",
+  "wall_loops": "2",
+  "sparse_infill_density": "5%",
+  "enable_support": "1",
+  "support_type": "tree(auto)",
+  "support_on_build_plate_only": "1",
+  "support_threshold_angle": "35",
+  "brim_type": "outer_only",
+  "brim_width": "6",
+  "wall_generator": "arachne"
+}

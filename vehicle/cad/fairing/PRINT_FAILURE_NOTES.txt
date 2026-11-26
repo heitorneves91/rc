@@ -1,0 +1,49 @@
+NOSE_R_1 / PLATE 4 — FIRST PHYSICAL FAILURE REPORT
+Evidence: repository-root failure.jpeg, supplied by the user after printing.
+
+Observation: the curved outer fender has heavily drooping/loose extrusions,
+while the adjacent broad panel is substantially smoother and the visible brim
+appears attached. Nearby tree supports also have rough/gapped walls. A still
+photo cannot establish whether a support broke, when damage started, or whether
+supports had already been removed. The user confirmed critical-only supports and adaptive layer height were
+enabled. Other job settings and whether supports were removed are unconfirmed.
+
+Leading diagnosis: insufficient effective support beneath the curved fender,
+possibly compounded by thin-shell motion, support instability or cooling/speed.
+This is an inference, not a confirmed printer/extruder fault. Global clogging or
+bed detachment should not be asserted from this image alone.
+
+Important profile discovery: the supplied fairing-P1S.3mf project settings have
+support_critical_regions_only=1. The small P1S_PLA_process.json does not override
+this inherited setting. Earlier advice describing the original project as a
+broader automatic-support baseline was incorrect. A slicer PASS proves slicing
+completed, not that a physical overhang will print successfully.
+Bambu Studio maintainer explanation: critical-only supports can omit curved
+non-critical overhangs and target cantilevers/fully suspended regions:
+https://github.com/bambulab/BambuStudio/issues/8402
+
+Suggested controlled retry (not yet printed or validated):
+- Print Nose_R alone, retaining the supplied seam-down orientation initially.
+- Disable Support critical regions only; retain automatic trees, 35-degree
+  threshold and 6 mm brim as the initial baseline.
+- Verify support/interface actually follows the underside of the failed fender;
+  do not assume two nearby tree trunks provide continuous adequate support.
+  Paint enforcement where necessary. Bed-only support must not prevent reaching
+  an underside; inspect the sliced layers.
+- Start with fixed 0.20 mm layers to isolate the support change. Revisit adaptive
+  layers after a successful print; they cannot replace support under a curve.
+- Conservative trial speeds: outer walls about 60 mm/s, troublesome overhangs
+  about 20-30 mm/s. Keep PLA part cooling active. Verify supports remain stable.
+- Use the actual filament profile. Do not blindly change flow, nozzle temperature
+  or infill to address a localized unsupported surface.
+- Check the earliest damaged layers in Preview; unsupported extrusion paths,
+  sparse contact, broken support or local shell wobble suggest different fixes.
+
+Do not mark a retry successful or revise the print-kit mass/time until re-sliced
+and physically tested. The currently distributed package is unchanged.
+
+FOLLOW-UP: Revision 3 replaces these wraparound shells with separate hood/deck,
+fender and cabin panels. Read FAIRING.txt for the current geometry and print
+settings; the retry suggestions above refer to the old revision-2 nose. Most
+joints have integrated glue laps with tapered roots. The two printed wing/bumper
+parts are locked and excluded from the remaining print queue.

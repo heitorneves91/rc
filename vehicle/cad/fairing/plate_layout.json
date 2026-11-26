@@ -1,0 +1,947 @@
+{
+  "plates": [
+    {
+      "plate_index": 1,
+      "plate_name": "Fairing 1",
+      "need_arrange": false,
+      "objects": [
+        {
+          "path": "print/Cab_frame_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_hood_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            129.337
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Front_grille.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Roof_vent_grille.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            104.0
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Quarter_grille_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            172.0
+          ],
+          "pos_y": [
+            182.85
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Mount_1_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Mount_1_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            62.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Mount_2_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            96.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Mount_2_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            130.0
+          ],
+          "pos_z": [
+            0
+          ]
+        }
+      ],
+      "plate_params": {
+        "print_sequence": "by layer"
+      }
+    },
+    {
+      "plate_index": 2,
+      "plate_name": "Fairing 2",
+      "need_arrange": false,
+      "objects": [
+        {
+          "path": "print/Cab_frame_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_hood_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            129.337
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Quarter_grille_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            129.337
+          ],
+          "pos_y": [
+            182.85
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_fender_fore_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            187.337
+          ],
+          "pos_y": [
+            182.85
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_fender_fore_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Wing_pylon_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            66.214
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Roof_spacer_1_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Roof_spacer_1_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            55.2
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Roof_spacer_2_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            82.4
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Roof_spacer_2_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            220.956
+          ],
+          "pos_y": [
+            109.6
+          ],
+          "pos_z": [
+            0
+          ]
+        }
+      ],
+      "plate_params": {
+        "print_sequence": "by layer"
+      }
+    },
+    {
+      "plate_index": 3,
+      "plate_name": "Fairing 3",
+      "need_arrange": false,
+      "objects": [
+        {
+          "path": "print/Roof_cap.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Cab_sill_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            160.868
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Tail_fender_aft_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            135.921
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Tail_fender_aft_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            66.214
+          ],
+          "pos_y": [
+            135.921
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Wing_pylon_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            132.428
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Splice_Rear_L1.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            189.755
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Splice_center_Tail.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            215.004
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Splice_center_Nose.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            215.004
+          ],
+          "pos_y": [
+            74.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Headlight_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            215.004
+          ],
+          "pos_y": [
+            118.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Headlight_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            215.004
+          ],
+          "pos_y": [
+            150.0
+          ],
+          "pos_z": [
+            0
+          ]
+        }
+      ],
+      "plate_params": {
+        "print_sequence": "by layer"
+      }
+    },
+    {
+      "plate_index": 4,
+      "plate_name": "Fairing 4",
+      "need_arrange": false,
+      "objects": [
+        {
+          "path": "print/Tail_deck_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Tail_deck_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            102.215
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Tail_fender_fore_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            151.85
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Tail_fender_fore_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            66.214
+          ],
+          "pos_y": [
+            151.85
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_fender_aft_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            132.428
+          ],
+          "pos_y": [
+            151.85
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_cheek_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            204.43
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_cheek_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            204.43
+          ],
+          "pos_y": [
+            113.904
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Splice_Front_L1.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            198.642
+          ],
+          "pos_y": [
+            199.808
+          ],
+          "pos_z": [
+            0
+          ]
+        }
+      ],
+      "plate_params": {
+        "print_sequence": "by layer"
+      }
+    },
+    {
+      "plate_index": 5,
+      "plate_name": "Fairing 5",
+      "need_arrange": false,
+      "objects": [
+        {
+          "path": "print/Cab_sill_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Nose_fender_aft_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            54.136
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Wing_endplate_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            54.136
+          ],
+          "pos_y": [
+            128.55700000000002
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Wing_endplate_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            100.136
+          ],
+          "pos_y": [
+            128.55700000000002
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Rear_light_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            0.0
+          ],
+          "pos_y": [
+            203.7
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Rear_light_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            74.0
+          ],
+          "pos_y": [
+            193.55700000000002
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Splice_Rear_R1.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            148.0
+          ],
+          "pos_y": [
+            28.0
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Splice_Front_R1.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            120.35
+          ],
+          "pos_y": [
+            62.5
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Join_Nose_cheek_R.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            120.35
+          ],
+          "pos_y": [
+            95.312
+          ],
+          "pos_z": [
+            0
+          ]
+        },
+        {
+          "path": "print/Join_Nose_cheek_L.stl",
+          "count": 1,
+          "filaments": [
+            1
+          ],
+          "assemble_index": [
+            0
+          ],
+          "pos_x": [
+            146.136
+          ],
+          "pos_y": [
+            125.312
+          ],
+          "pos_z": [
+            0
+          ]
+        }
+      ],
+      "plate_params": {
+        "print_sequence": "by layer"
+      }
+    }
+  ]
+}

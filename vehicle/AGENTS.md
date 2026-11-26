@@ -108,3 +108,72 @@ The layout is declared in `include/camera_service.h`; the receiving side is `Cam
 - Log through `LOG_INFO`/`LOG_WARN`/`LOG_ERROR`/`LOG_DEBUG` from `logs.h` with the module name as the tag, honouring `config.log_level`.
 - Comments and some strings may be in Portuguese.
 - `cad/car.FCStd` is a large binary committed on nearly every CAD change; commit messages for it are conventionally just `cad`.
+
+## Fairing CAD and print workflow
+
+The body reference is `fairing.png` at the repository root. The separate body
+is `cad/fairing.FCStd`; `cad/full_assembly.FCStd` contains its embedded snapshots
+under the Fairing group. Read `cad/fairing/FAIRING.txt` and `cad/ASSEMBLY.txt`
+before editing either. `cad/fairing/build_fairing.py` is the editable source;
+`parameters.json`, the CAD files, oriented STLs, manifests and verification
+reports are generated outputs. Run `cad/rebuild_fairing.FCMacro` to regenerate
+and install the body, then `cad/verify_fairing.FCMacro` to verify it. Rebuilding
+the mechanical assembly reinstalls the existing body snapshot, but does not
+regenerate its geometry or clearances.
+
+Preserve the accepted 74 mechanical components: no chassis locks; front shocks
+on the lower-arm centers; rear shocks on the aft lower-arm ends and behind the
+same chassis ears; correct socket directions and aligned servo mounts. Keep
+fixed placements and solver-free embedded B-reps. Retain the documented space
+for the unmodeled servo saver (20 mm added shaft length plus 10 mm axial
+margin; diameter remains unknown). All exported body parts must fit the user's
+Bambu Lab P1S (256 mm cubed), and print orientations must remain grounded.
+Verify actual STL bounds, watertightness and all collision/motion reserves;
+never rely on loose loft bounding boxes. Keep future-agent documentation,
+print manifests, slicer checks and assembled previews in sync with changes.
+
+
+Fairing revision 2 supersedes the first heavy/faceted body: nominal 1.0 mm
+cosmetic skins, two print walls, 5% infill, lower skirt/roof, and two rear lamp
+housings with an open rear center (no Tail_vent/grille). The accepted assembly
+pose is maximum suspension compression. Reserve travel downward (-20 mm), with
+only +3 mm residual tolerance; never restore the old +/-15 mm bump allowance.
+Saver compensation is lateral: preserve 20 mm shaft addition plus 10 mm margin,
+not the former excessive vertical envelope. Use the shape-preserving controlled
+B-spline surface generator, not a wavy unconstrained global loft. Run expensive
+CAD in a separate two-core, lower-priority process with a memory bound. Keep
+steering-angle capsules separate and cut/check serially; fusing the whole sweep
+can stall or crash a desktop. See the revision-2 guide for complete details.
+
+Use cad/fairing/run_headless.py only in a separate FreeCAD process for bounded
+build/verify/render stages. cad/fairing/slice_fairing.py reproduces the verified
+four-plate layout and two-wall / 5% infill project. Preserve its 20 mm model-box
+gaps; nesting accessories inside shells can collide with supports/brims. Keep
+all slicer toolpath conflict checks enabled. Update the print ZIP/checksums
+after edits; never distribute stale generated reports or obsolete Tail_vent.
+
+A physical Nose_R_1 print failed: read cad/fairing/PRINT_FAILURE_NOTES.txt before
+recommending supports or reprinting. The shipped 3MF inherited
+support_critical_regions_only=1; prior descriptions of a broader original
+support baseline were incorrect. Slicer PASS is not physical print validation.
+
+Fairing revision 3 replaces the six wraparound shell sections with separately
+oriented hood/deck panels, short fender segments, cabin sills and window frames.
+Recessed integrated glue laps align the panels; see the guide for exact splits.
+The user has successfully printed Rear_wing_1 and Front_bumper_1. Their exact
+B-reps and STL hashes are locked in cad/fairing/printed_reference/. Preserve
+those parts and all mating holes/interfaces. CAD/manifest retain both, but the
+default 3MF and print ZIP omit them from the remaining print queue. Endplates
+and pylons are still needed. Critical-only support and small-overhang removal
+are explicitly OFF. Compare support consumption with matched process settings,
+not against the old critical-only estimate; keep physical print validation
+separate from slicer PASS. Preserve 74 mechanical components and all reserves.
+
+The final revision-3 orientation check uses the actual transformed +Y axis:
+aft fenders/cheeks build toward +Y (+90 X rotation), fore fenders toward -Y
+(-90 X). Earlier comments got this sign wrong. Cabin sills now start at the
+existing pad plane Z=11, with pads/holes unchanged and verified broad first-layer
+contact. Rear lights print flat backing down (-90 X), raised details up. Keep
+the tapered lap roots: square ends can generate their own tall support trees.
+Use compare_support.py for matched-profile comparisons and package_print.py to
+rebuild the remaining-only ZIP. support_material.py records support by component.

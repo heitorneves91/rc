@@ -1,0 +1,41 @@
+{
+  "revision": 3,
+  "obsolete_shell_replacements": {
+    "Nose_L": [
+      "Nose_hood_L",
+      "Nose_fender_aft_L",
+      "Nose_fender_fore_L",
+      "Nose_cheek_L",
+      "Join_Nose_cheek_L"
+    ],
+    "Tail_L": [
+      "Tail_deck_L",
+      "Tail_fender_aft_L",
+      "Tail_fender_fore_L"
+    ],
+    "Cab_L": [
+      "Cab_sill_L",
+      "Cab_frame_L"
+    ],
+    "Nose_R": [
+      "Nose_hood_R",
+      "Nose_fender_aft_R",
+      "Nose_fender_fore_R",
+      "Nose_cheek_R",
+      "Join_Nose_cheek_R"
+    ],
+    "Tail_R": [
+      "Tail_deck_R",
+      "Tail_fender_aft_R",
+      "Tail_fender_fore_R"
+    ],
+    "Cab_R": [
+      "Cab_sill_R",
+      "Cab_frame_R"
+    ]
+  },
+  "reuse_successful_prints": [
+    "Rear_wing",
+    "Front_bumper"
+  ]
+}

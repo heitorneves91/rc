@@ -275,6 +275,14 @@ for sign,suffix in [(1,'L'),(-1,'R')]:
     add(rear,'Dogbone_'+suffix,'Body045',between((-19,0,0),(19,0,0),a,b),'steel',
         note='Saved dogbone length retained; articulation and cup engagement are visual estimates')
 
+# Refresh the optional fairing from its own document, without live links.
+# Rebuild fairing.FCStd separately when its geometry parameters change.
+if (CAD/'fairing.FCStd').exists():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('rc_fairing', CAD/'fairing'/'build_fairing.py')
+    fairing = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fairing)
+    fairing.install_into_assembly(doc)
 App.setActiveDocument(doc.Name)
 doc.recompute()
 for o in parts:

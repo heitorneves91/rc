@@ -1,0 +1,597 @@
+{
+  "revision": 3,
+  "reused_printed_parts": {
+    "Rear_wing": {
+      "stl_sha256": "aef1dd395daec0e9e1f0db2cfd533586249d8406f7a20e0c8ade1f6d372e775c",
+      "cad_volume_mm3": 15129.77823224719,
+      "status": "Successfully printed, user confirmed. Reuse; do not reprint or change interfaces."
+    },
+    "Front_bumper": {
+      "stl_sha256": "8980e7e4e859dab5b19e1c938c8ed5f118c529fea8812872b3388d6d826ede56",
+      "cad_volume_mm3": 10418.954488074785,
+      "status": "Successfully printed, user confirmed. Reuse; do not reprint or change interfaces."
+    }
+  },
+  "status": "PASS",
+  "errors": [],
+  "printable_parts": 49,
+  "mechanical_parts": 74,
+  "shell_wall_mm": 1.0,
+  "print_walls": 2,
+  "infill_percent": 5,
+  "print_volume_mm": [
+    256,
+    256,
+    256
+  ],
+  "design_limit_mm": 246,
+  "steering_reserve_mm": [
+    -65,
+    -177,
+    5,
+    65,
+    -78,
+    50
+  ],
+  "motion_assumptions": "Current assembly is maximum compression. Continuous wheel movement -20 mm down to +3 mm residual upward tolerance; front steering +/-30 degrees in 5-degree steps about the knuckle, with 3 mm tire inflation. No +15 mm bump allowance. Not a solved articulated suspension trajectory.",
+  "clearances": [
+    {
+      "servo_saver_added_shaft_mm": 20,
+      "extra_axial_margin_mm": 10,
+      "shaft_tip_mm": [
+        -27.624999999999996,
+        -131.76999999999998,
+        14.849999999999989
+      ],
+      "reserved_endpoint_mm": [
+        -57.625,
+        -131.76999999999998,
+        14.849999999999982
+      ],
+      "diameter": "unknown"
+    },
+    "steering_saver",
+    "wheel_droop_-32.5_R",
+    "wheel_droop_-32.5_L",
+    "wheel_droop_-301_R",
+    "wheel_droop_-301_L",
+    "front_steering_capsule_0",
+    "front_steering_capsule_1",
+    "front_steering_capsule_2",
+    "front_steering_capsule_3",
+    "front_steering_capsule_4",
+    "front_steering_capsule_5",
+    "front_steering_capsule_6",
+    "front_steering_capsule_7",
+    "front_steering_capsule_8",
+    "front_steering_capsule_9",
+    "front_steering_capsule_10",
+    "front_steering_capsule_11",
+    "front_steering_capsule_12",
+    "front_steering_capsule_13",
+    "front_steering_capsule_14",
+    "front_steering_capsule_15",
+    "front_steering_capsule_16",
+    "front_steering_capsule_17",
+    "front_steering_capsule_18",
+    "front_steering_capsule_19",
+    "front_steering_capsule_20",
+    "front_steering_capsule_21",
+    "front_steering_capsule_22",
+    "front_steering_capsule_23",
+    "front_steering_capsule_24",
+    "front_steering_capsule_25",
+    {
+      "component": "Steering_servo",
+      "volumetric_intersection": false
+    },
+    {
+      "component": "Steering_bellcrank_pair",
+      "volumetric_intersection": false
+    },
+    {
+      "component": "Servo_to_bellcrank_link",
+      "volumetric_intersection": false
+    },
+    {
+      "component": "Camera_and_ESP32_support",
+      "volumetric_intersection": false
+    }
+  ],
+  "mechanical_collisions": [],
+  "printed_part_collisions": [],
+  "total_solid_volume_cm3": 167.45,
+  "estimated_PLA_mass_g_at_1_24": 207.6,
+  "parts": [
+    {
+      "part": "Roof_cap",
+      "size_mm": [
+        140.867,
+        87.921,
+        12.85
+      ],
+      "volume_cm3": 9.744,
+      "facets": 16046
+    },
+    {
+      "part": "Nose_hood_R",
+      "size_mm": [
+        71.619,
+        134.85,
+        91.85
+      ],
+      "volume_cm3": 14.202,
+      "facets": 14170
+    },
+    {
+      "part": "Nose_fender_aft_R",
+      "size_mm": [
+        46.214,
+        80.557,
+        62.35
+      ],
+      "volume_cm3": 3.712,
+      "facets": 13078
+    },
+    {
+      "part": "Nose_fender_fore_R",
+      "size_mm": [
+        46.214,
+        27.371,
+        42.2
+      ],
+      "volume_cm3": 2.045,
+      "facets": 10374
+    },
+    {
+      "part": "Nose_cheek_R",
+      "size_mm": [
+        25.74,
+        65.904,
+        23.338
+      ],
+      "volume_cm3": 1.265,
+      "facets": 8408
+    },
+    {
+      "part": "Join_Nose_cheek_R",
+      "size_mm": [
+        24.0,
+        10.0,
+        13.585
+      ],
+      "volume_cm3": 0.261,
+      "facets": 4106
+    },
+    {
+      "part": "Tail_deck_R",
+      "size_mm": [
+        82.215,
+        103.85,
+        91.85
+      ],
+      "volume_cm3": 11.423,
+      "facets": 5750
+    },
+    {
+      "part": "Tail_fender_aft_R",
+      "size_mm": [
+        46.214,
+        81.59,
+        54.0
+      ],
+      "volume_cm3": 4.402,
+      "facets": 10564
+    },
+    {
+      "part": "Tail_fender_fore_R",
+      "size_mm": [
+        46.214,
+        81.027,
+        54.7
+      ],
+      "volume_cm3": 3.028,
+      "facets": 10734
+    },
+    {
+      "part": "Cab_sill_R",
+      "size_mm": [
+        34.136,
+        155.7,
+        66.0
+      ],
+      "volume_cm3": 10.502,
+      "facets": 7852
+    },
+    {
+      "part": "Cab_frame_R",
+      "size_mm": [
+        109.337,
+        155.7,
+        34.7
+      ],
+      "volume_cm3": 5.855,
+      "facets": 9604
+    },
+    {
+      "part": "Nose_hood_L",
+      "size_mm": [
+        71.619,
+        134.85,
+        91.85
+      ],
+      "volume_cm3": 14.202,
+      "facets": 14172
+    },
+    {
+      "part": "Nose_fender_aft_L",
+      "size_mm": [
+        46.214,
+        80.557,
+        62.35
+      ],
+      "volume_cm3": 3.712,
+      "facets": 13078
+    },
+    {
+      "part": "Nose_fender_fore_L",
+      "size_mm": [
+        46.214,
+        27.371,
+        42.2
+      ],
+      "volume_cm3": 2.045,
+      "facets": 10374
+    },
+    {
+      "part": "Nose_cheek_L",
+      "size_mm": [
+        25.74,
+        65.904,
+        23.338
+      ],
+      "volume_cm3": 1.265,
+      "facets": 8408
+    },
+    {
+      "part": "Join_Nose_cheek_L",
+      "size_mm": [
+        24.0,
+        10.0,
+        13.585
+      ],
+      "volume_cm3": 0.261,
+      "facets": 4106
+    },
+    {
+      "part": "Tail_deck_L",
+      "size_mm": [
+        82.215,
+        103.85,
+        91.85
+      ],
+      "volume_cm3": 11.423,
+      "facets": 5750
+    },
+    {
+      "part": "Tail_fender_aft_L",
+      "size_mm": [
+        46.214,
+        81.59,
+        54.0
+      ],
+      "volume_cm3": 4.402,
+      "facets": 10564
+    },
+    {
+      "part": "Tail_fender_fore_L",
+      "size_mm": [
+        46.214,
+        81.027,
+        54.7
+      ],
+      "volume_cm3": 3.028,
+      "facets": 10734
+    },
+    {
+      "part": "Cab_sill_L",
+      "size_mm": [
+        34.136,
+        155.7,
+        66.0
+      ],
+      "volume_cm3": 10.514,
+      "facets": 7852
+    },
+    {
+      "part": "Cab_frame_L",
+      "size_mm": [
+        109.337,
+        155.7,
+        34.7
+      ],
+      "volume_cm3": 5.855,
+      "facets": 9604
+    },
+    {
+      "part": "Splice_Front_L1",
+      "size_mm": [
+        28.065,
+        12.812,
+        4.474
+      ],
+      "volume_cm3": 0.124,
+      "facets": 80
+    },
+    {
+      "part": "Splice_Front_R1",
+      "size_mm": [
+        28.065,
+        12.812,
+        4.474
+      ],
+      "volume_cm3": 0.124,
+      "facets": 74
+    },
+    {
+      "part": "Splice_Rear_L1",
+      "size_mm": [
+        45.0,
+        14.5,
+        8.661
+      ],
+      "volume_cm3": 0.39,
+      "facets": 316
+    },
+    {
+      "part": "Splice_Rear_R1",
+      "size_mm": [
+        45.0,
+        14.5,
+        8.661
+      ],
+      "volume_cm3": 0.39,
+      "facets": 298
+    },
+    {
+      "part": "Splice_center_Nose",
+      "size_mm": [
+        18.0,
+        24.0,
+        9.926
+      ],
+      "volume_cm3": 0.346,
+      "facets": 212
+    },
+    {
+      "part": "Splice_center_Tail",
+      "size_mm": [
+        18.0,
+        26.0,
+        3.211
+      ],
+      "volume_cm3": 0.374,
+      "facets": 160
+    },
+    {
+      "part": "Mount_1_R",
+      "size_mm": [
+        14.0,
+        14.0,
+        21.1
+      ],
+      "volume_cm3": 1.118,
+      "facets": 884
+    },
+    {
+      "part": "Mount_1_L",
+      "size_mm": [
+        14.0,
+        14.0,
+        21.1
+      ],
+      "volume_cm3": 1.118,
+      "facets": 884
+    },
+    {
+      "part": "Mount_2_R",
+      "size_mm": [
+        14.0,
+        14.0,
+        21.1
+      ],
+      "volume_cm3": 1.118,
+      "facets": 884
+    },
+    {
+      "part": "Mount_2_L",
+      "size_mm": [
+        14.0,
+        14.0,
+        21.1
+      ],
+      "volume_cm3": 1.118,
+      "facets": 884
+    },
+    {
+      "part": "Roof_spacer_1_L",
+      "size_mm": [
+        7.2,
+        7.2,
+        9.161
+      ],
+      "volume_cm3": 0.235,
+      "facets": 994
+    },
+    {
+      "part": "Roof_spacer_1_R",
+      "size_mm": [
+        7.2,
+        7.2,
+        9.161
+      ],
+      "volume_cm3": 0.235,
+      "facets": 984
+    },
+    {
+      "part": "Roof_spacer_2_L",
+      "size_mm": [
+        7.2,
+        7.2,
+        11.443
+      ],
+      "volume_cm3": 0.347,
+      "facets": 964
+    },
+    {
+      "part": "Roof_spacer_2_R",
+      "size_mm": [
+        7.199,
+        7.2,
+        11.443
+      ],
+      "volume_cm3": 0.347,
+      "facets": 958
+    },
+    {
+      "part": "Roof_vent_grille",
+      "size_mm": [
+        48.0,
+        32.0,
+        2.083
+      ],
+      "volume_cm3": 1.236,
+      "facets": 484
+    },
+    {
+      "part": "Front_grille",
+      "size_mm": [
+        84.0,
+        23.0,
+        1.0
+      ],
+      "volume_cm3": 1.18,
+      "facets": 1076
+    },
+    {
+      "part": "Headlight_R",
+      "size_mm": [
+        20.0,
+        12.0,
+        1.45
+      ],
+      "volume_cm3": 0.159,
+      "facets": 28
+    },
+    {
+      "part": "Headlight_L",
+      "size_mm": [
+        20.0,
+        12.0,
+        1.45
+      ],
+      "volume_cm3": 0.159,
+      "facets": 28
+    },
+    {
+      "part": "Quarter_grille_R",
+      "size_mm": [
+        38.0,
+        37.0,
+        26.241
+      ],
+      "volume_cm3": 0.912,
+      "facets": 1064
+    },
+    {
+      "part": "Quarter_grille_L",
+      "size_mm": [
+        38.0,
+        37.0,
+        26.241
+      ],
+      "volume_cm3": 0.912,
+      "facets": 1064
+    },
+    {
+      "part": "Rear_light_R",
+      "size_mm": [
+        54.0,
+        13.0,
+        1.5
+      ],
+      "volume_cm3": 0.705,
+      "facets": 56
+    },
+    {
+      "part": "Rear_light_L",
+      "size_mm": [
+        54.0,
+        13.0,
+        1.5
+      ],
+      "volume_cm3": 0.705,
+      "facets": 56
+    },
+    {
+      "part": "Front_bumper",
+      "size_mm": [
+        154.0,
+        11.8,
+        7.0
+      ],
+      "volume_cm3": 10.419,
+      "facets": 1036
+    },
+    {
+      "part": "Rear_wing",
+      "size_mm": [
+        236.0,
+        40.0,
+        7.4
+      ],
+      "volume_cm3": 15.13,
+      "facets": 904
+    },
+    {
+      "part": "Wing_endplate_L",
+      "size_mm": [
+        26.0,
+        45.0,
+        1.2
+      ],
+      "volume_cm3": 1.154,
+      "facets": 44
+    },
+    {
+      "part": "Wing_endplate_R",
+      "size_mm": [
+        26.0,
+        45.0,
+        1.2
+      ],
+      "volume_cm3": 1.154,
+      "facets": 44
+    },
+    {
+      "part": "Wing_pylon_L",
+      "size_mm": [
+        37.327,
+        32.0,
+        14.0
+      ],
+      "volume_cm3": 1.551,
+      "facets": 1458
+    },
+    {
+      "part": "Wing_pylon_R",
+      "size_mm": [
+        37.327,
+        32.0,
+        14.0
+      ],
+      "volume_cm3": 1.551,
+      "facets": 1464
+    }
+  ]
+}
